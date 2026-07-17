@@ -91,7 +91,8 @@ app.get<{ Querystring: { path?: string } }>("/api/file", async (req, reply) => {
   if (ext === "md") {
     const source = await fsp.readFile(abs, "utf8");
     const rendered = renderMarkdown(source, rel, getState().corpus.files);
-    return { kind: "markdown", ...meta, ...rendered };
+    // `source` feeds the CodeMirror editor; `modified` is the edit baseline.
+    return { kind: "markdown", ...meta, source, ...rendered };
   }
   if (ext === "csv") {
     return { kind: "csv", ...meta, text: await fsp.readFile(abs, "utf8") };
@@ -101,6 +102,51 @@ app.get<{ Querystring: { path?: string } }>("/api/file", async (req, reply) => {
   if (ext === "html" || ext === "htm") return { kind: "html", ...meta };
   return { kind: "other", ...meta };
 });
+
+// The entire write surface of the app (brief §6/§11): save an edited .md.
+// Only existing markdown, atomic temp+rename so Drive sync sees one event,
+// and a 409 if the file changed on disk since the editor loaded it.
+app.put<{ Querystring: { path?: string }; Body: { content?: string; baseModified?: string } }>(
+  "/api/file",
+  async (req, reply) => {
+    const rel = req.query.path ?? "";
+    const abs = safeAbsolute(rel);
+    if (!abs || extOf(rel) !== "md") return badPath(reply);
+    if (typeof req.body?.content !== "string") {
+      return reply.status(400).send({ error: "missing_content" });
+    }
+
+    let stat;
+    try {
+      stat = await fsp.stat(abs);
+    } catch {
+      return reply.status(404).send({ error: "not_found", path: rel });
+    }
+    if (!stat.isFile()) return badPath(reply);
+
+    // Drive-clobber guard: refuse if the file moved under us (§10).
+    const current = stat.mtime.toISOString();
+    if (req.body.baseModified && req.body.baseModified !== current) {
+      return reply.status(409).send({
+        error: "conflict",
+        message: "This file changed on disk since you opened it.",
+        currentModified: current,
+      });
+    }
+
+    const dir = abs.slice(0, abs.lastIndexOf("/"));
+    const tmp = `${dir}/.${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`;
+    try {
+      await fsp.writeFile(tmp, req.body.content, "utf8");
+      await fsp.rename(tmp, abs);
+    } catch (err) {
+      await fsp.rm(tmp, { force: true }).catch(() => undefined);
+      return reply.status(500).send({ error: "write_failed", message: (err as Error).message });
+    }
+    const after = await fsp.stat(abs);
+    return { ok: true, path: rel, modified: after.mtime.toISOString() };
+  }
+);
 
 // Streams binaries for the viewers — never buffered whole (brief §10).
 app.get<{ Querystring: { path?: string } }>("/api/raw", async (req, reply) => {

@@ -1925,3 +1925,139 @@ a.ref-unresolved {
   font-size: var(--text-small);
   color: var(--ink-faint);
 }
+
+/* ==========================================================================
+   Phase 6 — editor, save state, keyboard map
+   ========================================================================== */
+
+.editor {
+  flex: 1;
+  min-height: 0;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm) inset;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.reader-tool-wide {
+  width: auto;
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.reader-tool-wide:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.reader-tool-wide:disabled:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.reader-savestate {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+.reader-savestate-saved { color: var(--accent-finances); }
+
+.reader-alert {
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-small);
+  margin-bottom: var(--space-2);
+}
+.reader-alert-conflict {
+  border-color: var(--accent-home);
+  background: color-mix(in srgb, var(--accent-home) 12%, var(--paper));
+}
+.reader-alert-error {
+  border-color: var(--accent-cookery-books);
+  background: color-mix(in srgb, var(--accent-cookery-books) 12%, var(--paper));
+}
+
+/* --- Keyboard-shortcuts overlay ----------------------------------------- */
+.keymap-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.keymap {
+  width: min(460px, 100%);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard-lg);
+  padding: var(--space-5);
+  animation: window-in var(--dur-quick) var(--ease-snap) both;
+}
+
+.keymap h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.keymap-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.keymap-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.keymap-keys {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 2px var(--space-2);
+  white-space: nowrap;
+}
+
+.keymap-hint {
+  margin-top: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* --- Dock stagger entrance (brief §7 orchestrated entrance) -------------- */
+.dock-item {
+  animation: dock-rise var(--dur-scene) var(--ease-snap) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 200ms);
+}
+
+@keyframes dock-rise {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* The hover lift must win once the entrance has played. */
+.dock-item:hover {
+  animation: none;
+}

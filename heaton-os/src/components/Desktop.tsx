@@ -4,6 +4,7 @@ import { getApp, WELCOME_APP } from "../apps";
 import { useWindows } from "../store/windows";
 import { Dock } from "./Dock";
 import { MenuBar } from "./MenuBar";
+import { KeymapOverlay } from "./KeymapOverlay";
 import { SearchPalette } from "./SearchPalette";
 import { WindowFrame } from "./WindowFrame";
 import { ActivityWindow } from "../windows/ActivityWindow";
@@ -30,6 +31,7 @@ export function Desktop({
   const close = useWindows((s) => s.close);
   const cycle = useWindows((s) => s.cycle);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [keymapOpen, setKeymapOpen] = useState(false);
 
   // First scene: Welcome and the live Files window.
   useEffect(() => {
@@ -40,11 +42,18 @@ export function Desktop({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setKeymapOpen(false);
+        return;
+      }
       if (!e.metaKey && !e.ctrlKey) return;
       const key = e.key.toLowerCase();
       if (key === "k") {
         e.preventDefault();
         setPaletteOpen((o) => !o);
+      } else if (key === "/") {
+        e.preventDefault();
+        setKeymapOpen((o) => !o);
       } else if (key === "w") {
         const { focusedId } = useWindows.getState();
         if (focusedId) {
@@ -98,6 +107,7 @@ export function Desktop({
       </main>
       <Dock onSearch={() => setPaletteOpen(true)} />
       {paletteOpen && <SearchPalette onClose={() => setPaletteOpen(false)} />}
+      {keymapOpen && <KeymapOverlay onClose={() => setKeymapOpen(false)} />}
     </div>
   );
 }

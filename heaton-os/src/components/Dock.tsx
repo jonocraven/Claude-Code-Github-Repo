@@ -10,12 +10,13 @@ export function Dock({ onSearch }: { onSearch: () => void }) {
   const spaces = APPS.filter((a) => a.kind === "space");
   const system = APPS.filter((a) => a.kind === "system");
 
+  let order = 0;
   const item = (app: (typeof APPS)[number]) => (
     <button
       key={app.id}
       type="button"
       className="dock-item"
-      style={{ color: `var(${app.accentVar})` }}
+      style={{ color: `var(${app.accentVar})`, "--i": order++ } as React.CSSProperties}
       onClick={() => (app.id === "search" ? onSearch() : openApp(app.id))}
       aria-label={`Open ${app.name}`}
     >

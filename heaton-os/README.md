@@ -2,7 +2,7 @@
 
 > **What:** The Claude workspace (`/Users/jonathancraven/Claude`) rendered as a warm, print-craft desktop operating system — spaces as apps, files beautifully readable, live Todoist and scheduled-task data alongside.
 > **Why:** Navigating the workspace through Finder and raw markdown is hard work.
-> **Status:** Phases 0–5 built (scaffold, shell, Files + Reader, search, system apps, space apps) · Phase 6 (polish) to come.
+> **Status:** All six phases built — scaffold, shell, Files + Reader, search, system apps, space apps, and polish (editing, icons, keyboard map).
 
 Built from `heaton-os-build-brief-17-07-2026.md`.
 
@@ -71,6 +71,14 @@ Vite dev server together, and opens the browser.
   to the space. Bespoke per §5: Cookery-Books' filterable recipe grid,
   Job-Search's CV lanes, Side-Hustle's artwork thumbnails, Finances' next
   bi-monthly refresh date, Life-Plan's quiet quarantine note, and so on.
+- **Phase 6 — Polish.** Editing is the app's only write surface: the Reader's
+  Edit toggle swaps the rendered view for a CodeMirror 6 markdown editor with
+  a dirty indicator and explicit ⌘S — saved via `PUT /api/file`, which writes
+  atomically (temp + rename) and returns 409 if the file changed on disk since
+  it loaded, so a Drive-synced edit is never silently clobbered. Plus a
+  hand-drawn SVG icon set (round-capped, stamp-like, per-space tinted), a ⌘/
+  keyboard-shortcuts map, and a staggered dock entrance — all inside the
+  `prefers-reduced-motion` guard.
 
 All design values live in CSS custom properties (`src/styles/tokens.css`) —
 a future theme is one token-file swap (brief §12).

@@ -43,6 +43,37 @@ export interface FileResponse {
   frontmatter?: FrontMatterField[];
   html?: string;
   text?: string;
+  source?: string; // raw markdown, for the editor
+}
+
+export interface SaveResult {
+  ok: boolean;
+  conflict?: boolean;
+  modified?: string;
+  message?: string;
+}
+
+/** Save an edited markdown file (the app's only write). */
+export async function saveFile(
+  path: string,
+  content: string,
+  baseModified: string
+): Promise<SaveResult> {
+  const res = await fetch(`/api/file?path=${encodeURIComponent(path)}`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ content, baseModified }),
+  });
+  if (res.status === 409) {
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, conflict: true, message: body.message, modified: body.currentModified };
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, message: body.message ?? `Save failed (${res.status})` };
+  }
+  const body = await res.json();
+  return { ok: true, modified: body.modified };
 }
 
 export interface Backlink {
