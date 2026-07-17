@@ -1,0 +1,37 @@
+{
+  "name": "heaton-os",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The Claude workspace as a warm print-craft desktop OS",
+  "scripts": {
+    "os": "concurrently -k -n server,web -c green,magenta \"npm:server\" \"npm:web\"",
+    "server": "tsx watch server/index.ts",
+    "web": "vite --open",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/archivo-black": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.10.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-rnd": "^10.5.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.3",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  }
+}
