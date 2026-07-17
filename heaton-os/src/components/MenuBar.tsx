@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchMemoryHealth, type MemoryStatus } from "../api";
 import { getApp } from "../apps";
 import { useWindows } from "../store/windows";
 
@@ -10,14 +11,37 @@ function clock(now: Date): string {
   return `${dd}-${mm}-${now.getFullYear()}  ${hh}:${min}`;
 }
 
+const MEMORY_TITLE: Record<MemoryStatus, string> = {
+  green: "Memory: all within ceilings",
+  amber: "Memory: a file is approaching its ceiling",
+  red: "Memory: a file is over its ceiling",
+};
+
 export function MenuBar({ onSearch }: { onSearch: () => void }) {
   const focusedId = useWindows((s) => s.focusedId);
   const windows = useWindows((s) => s.windows);
+  const openApp = useWindows((s) => s.openApp);
   const [now, setNow] = useState(() => new Date());
+  const [memory, setMemory] = useState<MemoryStatus>("green");
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  // Poll memory health so the dot reflects the workspace live (brief §3).
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      fetchMemoryHealth()
+        .then((h) => alive && setMemory(h.worst))
+        .catch(() => undefined);
+    load();
+    const t = setInterval(load, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
   }, []);
 
   const focused = windows.find((w) => w.id === focusedId && !w.minimized);
@@ -40,10 +64,11 @@ export function MenuBar({ onSearch }: { onSearch: () => void }) {
         <button
           type="button"
           className="menubar-item"
-          title="Memory Monitor arrives in Phase 4"
-          aria-label="Memory health (arrives in Phase 4)"
+          title={MEMORY_TITLE[memory]}
+          aria-label={MEMORY_TITLE[memory]}
+          onClick={() => openApp("memory")}
         >
-          <span className="memory-dot" aria-hidden="true" />
+          <span className={`memory-dot memory-dot-${memory}`} aria-hidden="true" />
         </button>
         <button
           type="button"

@@ -40,8 +40,11 @@ interface WindowState {
   windows: Win[];
   nextZ: number;
   focusedId: string | null;
+  /** Path the Files app should expand to and highlight, if any. */
+  revealPath: string | null;
   openWindow: (opts: OpenWindowOpts) => void;
   openApp: (appId: string) => void;
+  reveal: (path: string) => void;
   close: (id: string) => void;
   focus: (id: string) => void;
   minimize: (id: string) => void;
@@ -107,12 +110,16 @@ function comfortableBounds(): Bounds {
   return { x: Math.round((dw - w) / 2), y: 52, w, h };
 }
 
+// Apps that open at the wider reading/dashboard size.
+const WIDE_APPS = new Set(["reader", "tasks", "calendar", "memory", "activity"]);
+
 let uid = 0;
 
 export const useWindows = create<WindowState>((set, get) => ({
   windows: [],
   nextZ: 1,
   focusedId: null,
+  revealPath: null,
 
   openWindow: ({ appId, instanceKey = "", title, payload = {} }) => {
     const { windows, nextZ } = get();
@@ -135,7 +142,7 @@ export const useWindows = create<WindowState>((set, get) => ({
     const base =
       saved && siblings === 0
         ? clampToDesktop(saved)
-        : defaultBounds(windows.length, appId === "reader");
+        : defaultBounds(windows.length, WIDE_APPS.has(appId) || getApp(appId).kind === "space");
     const offset = siblings * 28;
     const id = `win-${uid++}`;
     const win: Win = {
@@ -153,6 +160,14 @@ export const useWindows = create<WindowState>((set, get) => ({
   },
 
   openApp: (appId) => get().openWindow({ appId }),
+
+  reveal: (path) => {
+    // Strip a trailing slash so a folder path matches tree node paths.
+    const clean = path.replace(/\/$/, "");
+    get().openWindow({ appId: "files" });
+    set({ revealPath: clean });
+  },
+
 
   close: (id) => {
     const { windows, focusedId } = get();

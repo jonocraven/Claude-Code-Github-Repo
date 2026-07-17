@@ -2,7 +2,7 @@
 
 > **What:** The Claude workspace (`/Users/jonathancraven/Claude`) rendered as a warm, print-craft desktop operating system — spaces as apps, files beautifully readable, live Todoist and scheduled-task data alongside.
 > **Why:** Navigating the workspace through Finder and raw markdown is hard work.
-> **Status:** Phases 0–3 built (scaffold, shell, Files + Reader, search) · Phases 4–6 to come.
+> **Status:** Phases 0–5 built (scaffold, shell, Files + Reader, search, system apps, space apps) · Phase 6 (polish) to come.
 
 Built from `heaton-os-build-brief-17-07-2026.md`.
 
@@ -56,9 +56,32 @@ Vite dev server together, and opens the browser.
   background after boot and surfaces concept matches under a "Related"
   divider; first run downloads the ~25MB model once. Until it's ready the
   palette shows "building semantic index…" and keyword search works alone.
+- **Phase 4 — System apps.** **Tasks** (My Plate + per-space tabs, priority
+  and owner badges, due dates, tick-to-complete with a real undo, deep links)
+  over a Todoist REST proxy that keeps the token server-side and reports a
+  calm setup card when it's absent. **Calendar** expands the workspace
+  cadences (Appendix B) into a month grid, staggered, with each run linking
+  to its `Scheduled/` folder. **Memory Monitor** gauges every memory file
+  against the Appendix C ceilings (amber at 85%, red at breach — ported from
+  `memory-hygiene-check.sh`), and the menu-bar dot reflects the worst live.
+  **Activity** is a 14-day timeline of changes grouped by day, badged by space.
+- **Phase 5 — Space apps.** Each of the eight spaces opens on a dashboard —
+  MEMORY.md hero (front-matter card + clickable refs), its Todoist section
+  tasks, five most-recent files, and bespoke panels — plus a Files tab scoped
+  to the space. Bespoke per §5: Cookery-Books' filterable recipe grid,
+  Job-Search's CV lanes, Side-Hustle's artwork thumbnails, Finances' next
+  bi-monthly refresh date, Life-Plan's quiet quarantine note, and so on.
 
 All design values live in CSS custom properties (`src/styles/tokens.css`) —
 a future theme is one token-file swap (brief §12).
+
+### Todoist token
+
+Tasks (Phase 4) and the space section-task panels (Phase 5) proxy the Todoist
+REST API v2 through the server. Paste your token into `.env` as
+`TODOIST_API_TOKEN=...` (Todoist → Settings → Integrations → Developer) and
+restart. Without it the apps show a setup card; for local demos,
+`TODOIST_FIXTURE=fixtures/todoist-fixture.json` serves sample tasks instead.
 
 ## Development away from the Mac
 

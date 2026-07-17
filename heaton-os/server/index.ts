@@ -10,6 +10,10 @@ import { renderMarkdown } from "./markdown.js";
 import { getState, initState } from "./state.js";
 import { searchKeyword } from "./search.js";
 import { searchSemantic, semanticStatus } from "./semantic.js";
+import { memoryHealth } from "./memory.js";
+import { recentActivity } from "./recent.js";
+import { scheduledMonth } from "./scheduled.js";
+import { completeTask, plate, sectionTasks } from "./todoist.js";
 
 // Model downloads etc. respect HTTPS_PROXY when one is configured; a no-op
 // otherwise. Fetches happen only at first semantic-index build.
@@ -156,6 +160,51 @@ app.post<{ Querystring: { path?: string } }>("/api/open", async (req, reply) => 
   if (!abs) return badPath(reply);
   return openWith([abs], reply);
 });
+
+// --- Phase 4: system-app data -------------------------------------------
+
+app.get("/api/memory-health", async () => memoryHealth());
+
+app.get<{ Querystring: { days?: string } }>("/api/recent", async (req) => {
+  const days = Math.min(Math.max(Number(req.query.days) || 14, 1), 90);
+  return { days, activity: await recentActivity(days) };
+});
+
+app.get<{ Querystring: { year?: string; month?: string } }>(
+  "/api/scheduled",
+  async (req) => {
+    const now = new Date();
+    const year = Number(req.query.year) || now.getFullYear();
+    const month = Number(req.query.month) || now.getMonth() + 1;
+    return { year, month, events: await scheduledMonth(year, month) };
+  }
+);
+
+app.get("/api/todoist/plate", async () => plate());
+
+app.get<{ Querystring: { space?: string } }>(
+  "/api/todoist/space",
+  async (req, reply) => {
+    const space = req.query.space ?? "";
+    if (!space) return badPath(reply);
+    return sectionTasks(space);
+  }
+);
+
+app.post<{ Querystring: { id?: string } }>(
+  "/api/todoist/complete",
+  async (req, reply) => {
+    const id = req.query.id ?? "";
+    if (!id) return badPath(reply);
+    try {
+      return await completeTask(id);
+    } catch (err) {
+      return reply
+        .status(502)
+        .send({ ok: false, error: (err as Error).message });
+    }
+  }
+);
 
 async function start() {
   if (fs.existsSync(WORKSPACE_ROOT)) {

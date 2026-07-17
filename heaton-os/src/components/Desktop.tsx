@@ -6,11 +6,17 @@ import { Dock } from "./Dock";
 import { MenuBar } from "./MenuBar";
 import { SearchPalette } from "./SearchPalette";
 import { WindowFrame } from "./WindowFrame";
+import { ActivityWindow } from "../windows/ActivityWindow";
+import { CalendarWindow } from "../windows/CalendarWindow";
 import { FilesWindow } from "../windows/FilesWindow";
+import { MemoryWindow } from "../windows/MemoryWindow";
 import { PlaceholderWindow } from "../windows/PlaceholderWindow";
 import { ReaderWindow } from "../windows/ReaderWindow";
+import { SpaceWindow } from "../windows/SpaceWindow";
+import { TasksWindow } from "../windows/TasksWindow";
 import { ViewerWindow } from "../windows/ViewerWindow";
 import { WelcomeWindow } from "../windows/WelcomeWindow";
+import { SPACE_CONFIG } from "../spaces";
 
 export function Desktop({
   tree,
@@ -64,7 +70,18 @@ export function Desktop({
         return <ReaderWindow windowId={win.id} path={win.payload.path} />;
       case "viewer":
         return <ViewerWindow path={win.payload.path} kind={win.payload.kind} />;
+      case "tasks":
+        return <TasksWindow />;
+      case "calendar":
+        return <CalendarWindow />;
+      case "memory":
+        return <MemoryWindow />;
+      case "activity":
+        return <ActivityWindow />;
       default:
+        if (SPACE_CONFIG[win.appId]) {
+          return <SpaceWindow spaceId={win.appId} tree={tree} />;
+        }
         return <PlaceholderWindow app={getApp(win.appId)} />;
     }
   };

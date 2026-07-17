@@ -101,6 +101,98 @@ export function postAction(action: "reveal" | "open", path: string): Promise<unk
   });
 }
 
+// --- Phase 4: system-app data --------------------------------------------
+
+export type MemoryStatus = "green" | "amber" | "red";
+
+export interface MemoryGauge {
+  path: string;
+  label: string;
+  lines: number;
+  words: number;
+  lineCeiling: number;
+  wordCeiling: number;
+  linePct: number;
+  wordPct: number;
+  status: MemoryStatus;
+}
+
+export interface MemoryHealth {
+  gauges: MemoryGauge[];
+  worst: MemoryStatus;
+}
+
+export function fetchMemoryHealth(): Promise<MemoryHealth> {
+  return getJson("/api/memory-health");
+}
+
+export interface ActivityFile {
+  path: string;
+  name: string;
+  ext: string;
+  space: string | null;
+  area: string;
+  modified: string;
+}
+
+export interface ActivityDay {
+  date: string;
+  files: ActivityFile[];
+}
+
+export function fetchRecent(days: number): Promise<{ days: number; activity: ActivityDay[] }> {
+  return getJson(`/api/recent?days=${days}`);
+}
+
+export interface ScheduledEvent {
+  date: string;
+  time: string;
+  title: string;
+  cadence: string;
+  folder: string | null;
+}
+
+export function fetchScheduled(
+  year: number,
+  month: number
+): Promise<{ year: number; month: number; events: ScheduledEvent[] }> {
+  return getJson(`/api/scheduled?year=${year}&month=${month}`);
+}
+
+export type Owner = "jono" | "claude" | "waiting";
+
+export interface Task {
+  id: string;
+  content: string;
+  description: string;
+  priority: "p1" | "p2" | "p3" | "p4";
+  owner: Owner;
+  due: string | null;
+  sectionId: string | null;
+  sectionName: string | null;
+  url: string;
+}
+
+export interface TasksResult {
+  configured: boolean;
+  source: "live" | "fixture" | "none";
+  tasks: Task[];
+}
+
+export function fetchPlate(): Promise<TasksResult> {
+  return getJson("/api/todoist/plate");
+}
+
+export function fetchSpaceTasks(space: string): Promise<TasksResult> {
+  return getJson(`/api/todoist/space?space=${encodeURIComponent(space)}`);
+}
+
+export function completeTask(id: string): Promise<Response> {
+  return fetch(`/api/todoist/complete?id=${encodeURIComponent(id)}`, {
+    method: "POST",
+  });
+}
+
 /** DD-MM-YYYY — UK conventions throughout (brief §7). */
 export function formatDate(iso: string | null): string {
   if (!iso) return "—";

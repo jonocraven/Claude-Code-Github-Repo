@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDate, postAction, type TreeDir, type TreeNode } from "../api";
-import { openFile } from "../store/windows";
+import { openFile, useWindows } from "../store/windows";
 
 type SortMode = "name" | "modified";
 
@@ -73,14 +73,32 @@ function DirRow({
   node,
   depth,
   sort,
+  revealPath,
 }: {
   node: TreeDir;
   depth: number;
   sort: SortMode;
+  revealPath: string | null;
 }) {
   const [open, setOpen] = useState(depth < 1);
+  const onRevealPath =
+    revealPath !== null &&
+    node.path !== "" &&
+    (revealPath === node.path || revealPath.startsWith(node.path + "/"));
+  const isRevealTarget = revealPath !== null && revealPath === node.path;
+  const rowRef = useRef<HTMLLIElement>(null);
+
+  // A reveal (from Calendar/Activity) expands the ancestors on the path and
+  // scrolls the target into view.
+  useEffect(() => {
+    if (onRevealPath) setOpen(true);
+    if (isRevealTarget) {
+      rowRef.current?.scrollIntoView({ block: "center" });
+    }
+  }, [onRevealPath, isRevealTarget]);
+
   return (
-    <li className="tree-dir">
+    <li className={`tree-dir${isRevealTarget ? " is-revealed" : ""}`} ref={rowRef}>
       <button
         type="button"
         className="tree-row tree-dir-toggle"
@@ -100,7 +118,13 @@ function DirRow({
         <ul className="tree-children">
           {sortChildren(node.children, sort).map((child) =>
             child.type === "dir" ? (
-              <DirRow key={child.path} node={child} depth={depth + 1} sort={sort} />
+              <DirRow
+                key={child.path}
+                node={child}
+                depth={depth + 1}
+                sort={sort}
+                revealPath={revealPath}
+              />
             ) : (
               <FileRow key={child.path} node={child} />
             )
@@ -111,14 +135,33 @@ function DirRow({
   );
 }
 
+/** Find the subtree at a workspace-relative dir path, for space-scoped Files. */
+function subtreeAt(tree: TreeDir, scope: string): TreeDir | null {
+  if (scope === "") return tree;
+  const segments = scope.split("/");
+  let node: TreeDir = tree;
+  for (const seg of segments) {
+    const next = node.children.find(
+      (c): c is TreeDir => c.type === "dir" && c.name === seg
+    );
+    if (!next) return null;
+    node = next;
+  }
+  return node;
+}
+
 export function FilesWindow({
   tree,
   error,
+  scope = "",
 }: {
   tree: TreeDir | null;
   error: string | null;
+  /** Restrict the browser to this workspace-relative folder (Phase 5). */
+  scope?: string;
 }) {
   const [sort, setSort] = useState<SortMode>("name");
+  const revealPath = useWindows((s) => s.revealPath);
 
   if (error) {
     return (
@@ -139,12 +182,13 @@ export function FilesWindow({
       </div>
     );
   }
+  const root = subtreeAt(tree, scope) ?? tree;
   return (
     <div className="tree">
       <div className="tree-toolbar">
         <p className="tree-summary">
-          <strong>{tree.fileCount}</strong> files · latest change{" "}
-          {formatDate(tree.latestModified)}
+          <strong>{root.fileCount}</strong> files · latest change{" "}
+          {formatDate(root.latestModified)}
         </p>
         <div className="tree-sort" role="group" aria-label="Sort files">
           {(["name", "modified"] as const).map((mode) => (
@@ -161,9 +205,15 @@ export function FilesWindow({
         </div>
       </div>
       <ul className="tree-children tree-root">
-        {sortChildren(tree.children, sort).map((child) =>
+        {sortChildren(root.children, sort).map((child) =>
           child.type === "dir" ? (
-            <DirRow key={child.path} node={child} depth={0} sort={sort} />
+            <DirRow
+              key={child.path}
+              node={child}
+              depth={0}
+              sort={sort}
+              revealPath={revealPath}
+            />
           ) : (
             <FileRow key={child.path} node={child} />
           )

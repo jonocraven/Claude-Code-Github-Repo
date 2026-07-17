@@ -1128,3 +1128,800 @@ a.ref-unresolved {
   color: var(--ink-soft);
   padding: var(--space-3);
 }
+
+/* ==========================================================================
+   Phase 4 — system apps: Tasks, Calendar, Memory Monitor, Activity
+   ========================================================================== */
+
+/* --- Memory dot states (menu bar) --------------------------------------- */
+.memory-dot-green { background: var(--accent-wfdinner); }
+.memory-dot-amber { background: var(--accent-home); }
+.memory-dot-red { background: var(--accent-cookery-books); }
+
+/* --- Shared tabs -------------------------------------------------------- */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: var(--border);
+}
+
+.tab {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-3);
+  min-height: 32px;
+  background: var(--paper);
+}
+
+.tab.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* --- Tasks -------------------------------------------------------------- */
+.tasksapp {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tasksapp-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.tasksapp-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tasklist {
+  position: relative;
+}
+
+.tasklist-items {
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.tasklist-empty {
+  color: var(--ink-soft);
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+}
+
+.task {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  background: var(--paper);
+}
+
+.task-check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--paper);
+  transition: background var(--dur-quick) var(--ease-snap);
+}
+
+.task-check:hover {
+  background: var(--accent-wfdinner);
+}
+
+.task-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.task-content {
+  font-weight: 500;
+}
+
+.task-desc {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.task-pri {
+  font-weight: 700;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+}
+.task-pri-p1 { background: var(--accent-cookery-books); color: var(--paper); border-color: var(--accent-cookery-books); }
+.task-pri-p2 { background: var(--accent-home); color: var(--paper); border-color: var(--accent-home); }
+.task-pri-p3 { color: var(--ink-soft); }
+.task-pri-p4 { color: var(--ink-faint); }
+
+.task-owner {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius);
+  border: 1px solid var(--ink-faint);
+}
+.task-owner-jono { border-color: var(--ink); }
+.task-owner-claude { color: var(--accent-job-search); border-color: var(--accent-job-search); }
+.task-owner-waiting { color: var(--ink-faint); font-style: italic; }
+
+.task-section { color: var(--ink-soft); }
+
+.task-due { color: var(--ink-soft); }
+.task-due.is-soon { color: var(--accent-home); font-weight: 700; }
+.task-due.is-overdue { color: var(--accent-cookery-books); font-weight: 700; }
+
+.task-link {
+  margin-left: auto;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.task-link:hover { background: var(--ink); color: var(--paper); }
+
+.toast {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  font-size: var(--text-small);
+}
+
+.toast-undo {
+  color: var(--paper);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: var(--space-1) var(--space-2);
+  min-height: 32px;
+}
+
+/* --- Calendar ----------------------------------------------------------- */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.calendar-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  min-width: 12ch;
+  text-align: center;
+}
+
+.calendar-nav {
+  width: 36px;
+  height: 36px;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-size: 1.25rem;
+  line-height: 1;
+  background: var(--paper);
+}
+.calendar-nav:hover { background: var(--ink); color: var(--paper); }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--border-w);
+  background: var(--ink);
+  border: var(--border);
+}
+
+.calendar-weekdays {
+  border-bottom: none;
+  margin-bottom: var(--border-w);
+}
+
+.calendar-weekday {
+  background: var(--paper-deep);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-align: center;
+  padding: var(--space-1);
+  text-transform: uppercase;
+}
+
+.calendar-cell {
+  background: var(--paper);
+  min-height: 78px;
+  padding: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-cell.is-empty {
+  background: var(--paper-deep);
+}
+
+.calendar-cell.is-today {
+  outline: var(--border-w) solid var(--ink);
+  outline-offset: calc(-1 * var(--border-w));
+}
+
+.calendar-daynum {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.calendar-cell.is-today .calendar-daynum {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-runs {
+  display: grid;
+  gap: 2px;
+}
+
+.calendar-run-btn {
+  text-align: left;
+  width: 100%;
+}
+
+.calendar-run {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 1px var(--space-1);
+  border-left: 3px solid var(--run-accent, var(--ink));
+  background: var(--paper-deep);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-run-btn:hover .calendar-run {
+  background: var(--run-accent, var(--ink));
+  color: var(--paper);
+}
+
+.calendar-foot {
+  margin-top: var(--space-3);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+/* --- Memory Monitor ----------------------------------------------------- */
+.memory-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border);
+}
+
+.memory-verdict {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+}
+.memory-verdict-green { color: var(--accent-finances); }
+.memory-verdict-amber { color: var(--accent-home); }
+.memory-verdict-red { color: var(--accent-cookery-books); }
+
+.memory-sub {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.gauge {
+  display: block;
+  text-align: left;
+  width: 100%;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-3);
+  background: var(--paper);
+}
+.gauge:hover { box-shadow: var(--shadow-hard); }
+
+.gauge-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.gauge-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: var(--border);
+  flex-shrink: 0;
+}
+.gauge-dot-green { background: var(--accent-wfdinner); }
+.gauge-dot-amber { background: var(--accent-home); }
+.gauge-dot-red { background: var(--accent-cookery-books); }
+
+.gauge-name {
+  font-weight: 700;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gauge-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.gauge-bar { margin-top: var(--space-2); }
+
+.gauge-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  margin-bottom: 2px;
+}
+.gauge-bar-count { color: var(--ink-soft); }
+
+.gauge-track {
+  position: relative;
+  height: 10px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper-deep);
+}
+
+.gauge-fill {
+  height: 100%;
+  background: var(--ink);
+}
+
+.gauge-green .gauge-fill { background: var(--accent-wfdinner); }
+.gauge-amber .gauge-fill { background: var(--accent-home); }
+.gauge-red .gauge-fill { background: var(--accent-cookery-books); }
+
+.gauge-over {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 6px;
+  background: var(--accent-cookery-books);
+}
+
+/* --- Activity ----------------------------------------------------------- */
+.activity {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.activity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border);
+}
+
+.activity-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+}
+
+.activity-day {
+  margin-bottom: var(--space-4);
+}
+
+.activity-daylabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  padding: var(--space-1) 0;
+}
+
+.activity-daycount {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 999px;
+  padding: 0 var(--space-2);
+  font-size: 11px;
+}
+
+.activity-rows {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+.activity-row:hover { background: var(--paper-deep); }
+
+.activity-badge {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--badge-accent, var(--ink));
+  color: var(--badge-accent, var(--ink));
+  min-width: 9ch;
+  text-align: center;
+}
+
+.activity-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+/* Reveal highlight for Files (from Calendar/Activity) */
+.tree-dir.is-revealed > .tree-row {
+  outline: var(--border-w) solid var(--accent-home);
+  outline-offset: calc(-1 * var(--border-w));
+  border-radius: var(--radius);
+}
+
+/* ==========================================================================
+   Phase 5 — space apps: dashboard skeleton + bespoke panels
+   ========================================================================== */
+
+.spaceapp {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.space-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: var(--border);
+}
+
+.space-title {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  color: var(--space-accent, var(--ink));
+}
+
+.space-headnote {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.space-tabs {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.space-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+  align-content: start;
+}
+
+/* The memory hero and recipe/artwork panels earn the full width. */
+.space-panel:first-child,
+.space-panel:has(.recipe-grid),
+.space-panel:has(.artwork-grid) {
+  grid-column: 1 / -1;
+}
+
+.space-panel {
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  background: var(--paper);
+  padding: var(--space-3);
+  min-width: 0;
+}
+
+.space-panel-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.space-hero {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.space-hero .reader-body {
+  font-size: 1rem;
+}
+
+.space-hero-open {
+  margin-top: var(--space-3);
+}
+
+.space-empty {
+  color: var(--ink-soft);
+  font-size: var(--text-small);
+  padding: var(--space-2) 0;
+}
+
+.space-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-top: var(--space-2);
+}
+
+.space-filelist {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.space-filerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 34px;
+}
+.space-filerow:hover { background: var(--paper-deep); }
+
+.space-filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-subtabs {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: var(--space-2);
+}
+
+.space-search {
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-small);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+  background: var(--paper);
+}
+
+.space-link {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--space-accent, var(--ink));
+  border: var(--border);
+  border-color: var(--space-accent, var(--ink));
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  box-shadow: var(--shadow-hard-sm);
+  text-decoration: none;
+}
+.space-link:hover {
+  background: var(--space-accent, var(--ink));
+  color: var(--paper);
+}
+
+.space-files {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* --- Recipe card grid (Cookery-Books) ----------------------------------- */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+
+.recipe-card {
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.recipe-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.recipe-book {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.recipe-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+.recipe-cat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: 0 var(--space-1);
+}
+
+.recipe-rating {
+  color: var(--accent-cookery-books);
+  font-size: var(--text-small);
+  letter-spacing: -1px;
+}
+
+/* --- Artwork grid (Side-Hustle) ------------------------------------------ */
+.artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: var(--space-2);
+}
+
+.artwork-thumb {
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--paper-deep);
+  box-shadow: var(--shadow-hard-sm);
+}
+.artwork-thumb:hover { box-shadow: var(--shadow-hard); }
+
+.artwork-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* --- Finance refresh callout --------------------------------------------- */
+.finance-refresh {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+}
+
+.finance-refresh-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+.finance-refresh-date {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  color: var(--accent-finances);
+}
+
+.finance-refresh-sub {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+}

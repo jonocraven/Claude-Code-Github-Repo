@@ -10,23 +10,23 @@ export interface AppDef {
 
 export const APPS: AppDef[] = [
   // The eight space apps (brief §5)
-  { id: "cookery-books", name: "Cookery Books", kind: "space", accentVar: "--accent-cookery-books", arrivesInPhase: 5 },
-  { id: "wfdinner", name: "WFDinner", kind: "space", accentVar: "--accent-wfdinner", arrivesInPhase: 5 },
-  { id: "home", name: "Home", kind: "space", accentVar: "--accent-home", arrivesInPhase: 5 },
-  { id: "house-move", name: "House Move", kind: "space", accentVar: "--accent-house-move", arrivesInPhase: 5 },
-  { id: "job-search", name: "Job Search", kind: "space", accentVar: "--accent-job-search", arrivesInPhase: 5 },
-  { id: "finances", name: "Finances", kind: "space", accentVar: "--accent-finances", arrivesInPhase: 5 },
-  { id: "side-hustle", name: "Side Hustle", kind: "space", accentVar: "--accent-side-hustle", arrivesInPhase: 5 },
-  { id: "life-plan", name: "Life Plan", kind: "space", accentVar: "--accent-life-plan", arrivesInPhase: 5 },
+  { id: "cookery-books", name: "Cookery Books", kind: "space", accentVar: "--accent-cookery-books" },
+  { id: "wfdinner", name: "WFDinner", kind: "space", accentVar: "--accent-wfdinner" },
+  { id: "home", name: "Home", kind: "space", accentVar: "--accent-home" },
+  { id: "house-move", name: "House Move", kind: "space", accentVar: "--accent-house-move" },
+  { id: "job-search", name: "Job Search", kind: "space", accentVar: "--accent-job-search" },
+  { id: "finances", name: "Finances", kind: "space", accentVar: "--accent-finances" },
+  { id: "side-hustle", name: "Side Hustle", kind: "space", accentVar: "--accent-side-hustle" },
+  { id: "life-plan", name: "Life Plan", kind: "space", accentVar: "--accent-life-plan" },
 
   // System apps (brief §4)
   { id: "files", name: "Files", kind: "system", accentVar: "--accent-system" },
   { id: "reader", name: "Reader", kind: "system", accentVar: "--accent-system" },
   { id: "search", name: "Search", kind: "system", accentVar: "--accent-system" },
-  { id: "tasks", name: "Tasks", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
-  { id: "calendar", name: "Calendar", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
-  { id: "memory", name: "Memory", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
-  { id: "activity", name: "Activity", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
+  { id: "tasks", name: "Tasks", kind: "system", accentVar: "--accent-system" },
+  { id: "calendar", name: "Calendar", kind: "system", accentVar: "--accent-system" },
+  { id: "memory", name: "Memory", kind: "system", accentVar: "--accent-system" },
+  { id: "activity", name: "Activity", kind: "system", accentVar: "--accent-system" },
 ];
 
 export const WELCOME_APP: AppDef = {

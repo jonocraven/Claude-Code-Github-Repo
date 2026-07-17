@@ -1,0 +1,134 @@
+[
+  {
+    "id": "f-1",
+    "content": "Book the removals van for completion week",
+    "description": "Two quotes in; pick one and confirm the date once completion is set.",
+    "priority": "p1",
+    "owner": "jono",
+    "due": "2026-07-21",
+    "sectionId": "s-house",
+    "sectionName": "House Move",
+    "url": "https://todoist.com/showTask?id=f-1"
+  },
+  {
+    "id": "f-2",
+    "content": "Draft the interview-prep one-pager: pivot objections + STAR stories",
+    "description": "Claude to draft in a Job-Search chat, then Jono reviews.",
+    "priority": "p2",
+    "owner": "claude",
+    "due": null,
+    "sectionId": "s-job",
+    "sectionName": "Job Search",
+    "url": "https://todoist.com/showTask?id=f-2"
+  },
+  {
+    "id": "f-3",
+    "content": "Approve the case-study deck look",
+    "description": "Checkout deck built and awaiting a yes/no on the visual direction.",
+    "priority": "p1",
+    "owner": "jono",
+    "due": "2026-07-19",
+    "sectionId": "s-job",
+    "sectionName": "Job Search",
+    "url": "https://todoist.com/showTask?id=f-3"
+  },
+  {
+    "id": "f-4",
+    "content": "Chase the solicitor for the searches",
+    "description": "Waiting on local authority searches before we can exchange.",
+    "priority": "p2",
+    "owner": "waiting",
+    "due": null,
+    "sectionId": "s-house",
+    "sectionName": "House Move",
+    "url": "https://todoist.com/showTask?id=f-4"
+  },
+  {
+    "id": "f-5",
+    "content": "Decide: reading chair or piano for the arch alcove",
+    "description": "Drives the furniture order and the layout around it.",
+    "priority": "p3",
+    "owner": "jono",
+    "due": null,
+    "sectionId": "s-home",
+    "sectionName": "Home",
+    "url": "https://todoist.com/showTask?id=f-5"
+  },
+  {
+    "id": "f-6",
+    "content": "Build the mud kitchen for the garden",
+    "description": "",
+    "priority": "p3",
+    "owner": "jono",
+    "due": null,
+    "sectionId": "s-home",
+    "sectionName": "Home",
+    "url": "https://todoist.com/showTask?id=f-6"
+  },
+  {
+    "id": "f-7",
+    "content": "Refresh the shop listings for the summer range",
+    "description": "New artwork previews to swap in; update the three top listings first.",
+    "priority": "p2",
+    "owner": "jono",
+    "due": "2026-07-24",
+    "sectionId": "s-side",
+    "sectionName": "Side Hustle",
+    "url": "https://todoist.com/showTask?id=f-7"
+  },
+  {
+    "id": "f-8",
+    "content": "Price critical-illness cover at 2–3 levels",
+    "description": "For the August household summit decision paper.",
+    "priority": "p3",
+    "owner": "claude",
+    "due": "2026-07-30",
+    "sectionId": "s-fin",
+    "sectionName": "Finances",
+    "url": "https://todoist.com/showTask?id=f-8"
+  },
+  {
+    "id": "f-9",
+    "content": "Find Lucy's outstanding student loan balance",
+    "description": "Needed to set a realistic payoff year in the finance model.",
+    "priority": "p3",
+    "owner": "jono",
+    "due": null,
+    "sectionId": "s-fin",
+    "sectionName": "Finances",
+    "url": "https://todoist.com/showTask?id=f-9"
+  },
+  {
+    "id": "f-10",
+    "content": "Plan next week's dinners and build the shop list",
+    "description": "Pull three from the recipe library, one new to try.",
+    "priority": "p2",
+    "owner": "jono",
+    "due": "2026-07-20",
+    "sectionId": "s-wf",
+    "sectionName": "WFDinner",
+    "url": "https://todoist.com/showTask?id=f-10"
+  },
+  {
+    "id": "f-11",
+    "content": "Make bao buns this weekend",
+    "description": "",
+    "priority": "p4",
+    "owner": "jono",
+    "due": null,
+    "sectionId": "s-personal",
+    "sectionName": "Personal",
+    "url": "https://todoist.com/showTask?id=f-11"
+  },
+  {
+    "id": "f-12",
+    "content": "Add the new baby to the travel insurance before Portugal",
+    "description": "Flights and car hire booked for late September — do before departure.",
+    "priority": "p1",
+    "owner": "jono",
+    "due": "2026-09-07",
+    "sectionId": "s-personal",
+    "sectionName": "Personal",
+    "url": "https://todoist.com/showTask?id=f-12"
+  }
+]

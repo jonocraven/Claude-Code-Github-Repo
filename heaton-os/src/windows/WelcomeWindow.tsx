@@ -1,18 +1,20 @@
 export function WelcomeWindow() {
   return (
     <article className="welcome">
-      <p className="welcome-kicker">Phases 0–3 built — shell, reading, search</p>
+      <p className="welcome-kicker">Phases 0–5 built — the OS is live</p>
       <h3 className="welcome-heading">Good day, Jono.</h3>
       <p>
-        <strong>Files</strong> now opens everything: markdown lands in the
-        Reader (front-matter card, clickable cross-references, backlinks
-        panel), images zoom, PDFs and HTML render in place, CSVs become
-        sortable grids.
+        The dock is fully wired. Each <strong>space</strong> opens on a
+        dashboard — its memory, its Todoist tasks, recent files and bespoke
+        panels. <strong>Tasks</strong>, <strong>Calendar</strong>,{" "}
+        <strong>Memory</strong> and <strong>Activity</strong> carry live data;
+        the dot up top turns amber or red when a memory file nears its ceiling.
       </p>
       <p>
-        Press <strong>⌘K</strong> for search — documents, apps, and (once the
-        index has built) semantic matches under “Related”. The space apps and
-        live Todoist data arrive in Phases 4–5.
+        <strong>Files</strong> opens everything, the <strong>Reader</strong>
+        {" "}linkifies every cross-reference, and <strong>⌘K</strong> searches
+        the whole workspace. Add your Todoist token to <code>.env</code> for
+        live tasks; Phase 6 brings the hand-drawn icon set and editing.
       </p>
       <dl className="welcome-keys">
         <div>
