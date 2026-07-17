@@ -21,8 +21,8 @@ export const APPS: AppDef[] = [
 
   // System apps (brief §4)
   { id: "files", name: "Files", kind: "system", accentVar: "--accent-system" },
-  { id: "reader", name: "Reader", kind: "system", accentVar: "--accent-system", arrivesInPhase: 2 },
-  { id: "search", name: "Search", kind: "system", accentVar: "--accent-system", arrivesInPhase: 3 },
+  { id: "reader", name: "Reader", kind: "system", accentVar: "--accent-system" },
+  { id: "search", name: "Search", kind: "system", accentVar: "--accent-system" },
   { id: "tasks", name: "Tasks", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
   { id: "calendar", name: "Calendar", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
   { id: "memory", name: "Memory", kind: "system", accentVar: "--accent-system", arrivesInPhase: 4 },
@@ -36,9 +36,14 @@ export const WELCOME_APP: AppDef = {
   accentVar: "--accent-system",
 };
 
+/** Windows without a dock presence (opened via files/refs, not launched). */
+const HIDDEN_APPS: AppDef[] = [
+  WELCOME_APP,
+  { id: "viewer", name: "Viewer", kind: "system", accentVar: "--accent-system" },
+];
+
 export function getApp(id: string): AppDef {
-  if (id === WELCOME_APP.id) return WELCOME_APP;
-  const app = APPS.find((a) => a.id === id);
+  const app = APPS.find((a) => a.id === id) ?? HIDDEN_APPS.find((a) => a.id === id);
   if (!app) throw new Error(`Unknown app: ${id}`);
   return app;
 }

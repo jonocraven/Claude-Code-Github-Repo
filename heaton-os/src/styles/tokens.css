@@ -35,6 +35,9 @@
   --font-display: "Archivo Black", "Arial Black", sans-serif;
   --font-ui: "Space Grotesk", "Helvetica Neue", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Reader exception (§7): long-form text runs in a quiet literary serif. */
+  --font-reading: "Lora", Georgia, serif;
+  --reader-measure: 68ch;
 
   --text-body: 1rem;        /* ≥16px, always */
   --text-small: 0.875rem;   /* metadata only, never body copy */

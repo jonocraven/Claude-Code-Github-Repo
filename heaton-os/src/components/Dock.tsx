@@ -2,7 +2,7 @@ import { APPS } from "../apps";
 import { AppIcon } from "../icons";
 import { useWindows } from "../store/windows";
 
-export function Dock() {
+export function Dock({ onSearch }: { onSearch: () => void }) {
   const windows = useWindows((s) => s.windows);
   const openApp = useWindows((s) => s.openApp);
 
@@ -16,7 +16,7 @@ export function Dock() {
       type="button"
       className="dock-item"
       style={{ color: `var(${app.accentVar})` }}
-      onClick={() => openApp(app.id)}
+      onClick={() => (app.id === "search" ? onSearch() : openApp(app.id))}
       aria-label={`Open ${app.name}`}
     >
       <span className="dock-icon">

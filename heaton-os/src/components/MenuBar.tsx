@@ -10,7 +10,7 @@ function clock(now: Date): string {
   return `${dd}-${mm}-${now.getFullYear()}  ${hh}:${min}`;
 }
 
-export function MenuBar() {
+export function MenuBar({ onSearch }: { onSearch: () => void }) {
   const focusedId = useWindows((s) => s.focusedId);
   const windows = useWindows((s) => s.windows);
   const [now, setNow] = useState(() => new Date());
@@ -48,8 +48,9 @@ export function MenuBar() {
         <button
           type="button"
           className="menubar-item"
-          title="Search (⌘K) arrives in Phase 3"
-          aria-label="Search (arrives in Phase 3)"
+          title="Search (⌘K)"
+          aria-label="Search (⌘K)"
+          onClick={onSearch}
         >
           <svg
             width="16"

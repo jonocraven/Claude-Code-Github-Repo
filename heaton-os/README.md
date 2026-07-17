@@ -2,7 +2,7 @@
 
 > **What:** The Claude workspace (`/Users/jonathancraven/Claude`) rendered as a warm, print-craft desktop operating system — spaces as apps, files beautifully readable, live Todoist and scheduled-task data alongside.
 > **Why:** Navigating the workspace through Finder and raw markdown is hard work.
-> **Status:** Phase 0 (scaffold) + Phase 1 (shell) built · Phases 2–6 to come.
+> **Status:** Phases 0–3 built (scaffold, shell, Files + Reader, search) · Phases 4–6 to come.
 
 Built from `heaton-os-build-brief-17-07-2026.md`.
 
@@ -37,6 +37,25 @@ Vite dev server together, and opens the browser.
   and the window manager: drag, resize, z-order, minimise to dock, close,
   double-click/⌘-button maximise to a comfortable reading size, per-app
   position persistence, ⌘W close, ⌘` cycle.
+- **Phase 2 — Files + Reader.** Files browses the tree (A–Z / Recent sort)
+  and routes every file type: markdown to the Reader, images/PDF/HTML/CSV to
+  their viewers, anything else to reveal/open-in-default-app. The Reader
+  typesets in a quiet literary register (Lora, ~68ch), renders the
+  What/Why/Headline/Feeds/Status blockquote as a summary card, turns every
+  cross-reference into a click (backticked paths, relative links, bare
+  filenames resolved doc-dir → space root → workspace root; unresolvable
+  refs get a dotted marker, never a guess), and carries a collapsible
+  backlinks panel. HTML artefacts render in sandboxed iframes; CSVs become
+  sortable grids. The server watches the workspace (chokidar, debounced)
+  and rebuilds its indexes on change.
+- **Phase 3 — Search.** ⌘K palette: MiniSearch keyword index
+  (title/headings/body/path) with highlighted snippets, per-space filter
+  chips, app-launcher behaviour ("job" ↵ opens Job Search), full keyboard
+  navigation. A semantic layer (transformers.js, all-MiniLM-L6-v2, chunked
+  by heading, embeddings cached in `.cache/` by file hash) builds in the
+  background after boot and surfaces concept matches under a "Related"
+  divider; first run downloads the ~25MB model once. Until it's ready the
+  palette shows "building semantic index…" and keyword search works alone.
 
 All design values live in CSS custom properties (`src/styles/tokens.css`) —
 a future theme is one token-file swap (brief §12).

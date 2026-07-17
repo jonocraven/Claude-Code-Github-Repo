@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { TreeDir } from "../api";
 import { getApp, WELCOME_APP } from "../apps";
 import { useWindows } from "../store/windows";
 import { Dock } from "./Dock";
 import { MenuBar } from "./MenuBar";
+import { SearchPalette } from "./SearchPalette";
 import { WindowFrame } from "./WindowFrame";
+import { FilesWindow } from "../windows/FilesWindow";
 import { PlaceholderWindow } from "../windows/PlaceholderWindow";
-import { TreeWindow } from "../windows/TreeWindow";
+import { ReaderWindow } from "../windows/ReaderWindow";
+import { ViewerWindow } from "../windows/ViewerWindow";
 import { WelcomeWindow } from "../windows/WelcomeWindow";
 
 export function Desktop({
@@ -20,8 +23,9 @@ export function Desktop({
   const openApp = useWindows((s) => s.openApp);
   const close = useWindows((s) => s.close);
   const cycle = useWindows((s) => s.cycle);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
-  // First scene: the two Phase-1 windows — Welcome, and the live tree.
+  // First scene: Welcome and the live Files window.
   useEffect(() => {
     openApp("files");
     openApp(WELCOME_APP.id);
@@ -31,7 +35,11 @@ export function Desktop({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!e.metaKey && !e.ctrlKey) return;
-      if (e.key.toLowerCase() === "w") {
+      const key = e.key.toLowerCase();
+      if (key === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      } else if (key === "w") {
         const { focusedId } = useWindows.getState();
         if (focusedId) {
           e.preventDefault();
@@ -46,23 +54,33 @@ export function Desktop({
     return () => window.removeEventListener("keydown", onKey);
   }, [close, cycle]);
 
+  const content = (win: (typeof windows)[number]) => {
+    switch (win.appId) {
+      case WELCOME_APP.id:
+        return <WelcomeWindow />;
+      case "files":
+        return <FilesWindow tree={tree} error={error} />;
+      case "reader":
+        return <ReaderWindow windowId={win.id} path={win.payload.path} />;
+      case "viewer":
+        return <ViewerWindow path={win.payload.path} kind={win.payload.kind} />;
+      default:
+        return <PlaceholderWindow app={getApp(win.appId)} />;
+    }
+  };
+
   return (
     <div className="desktop paper-grain">
-      <MenuBar />
+      <MenuBar onSearch={() => setPaletteOpen(true)} />
       <main className="desktop-windows" aria-label="Windows">
         {windows.map((win) => (
           <WindowFrame key={win.id} win={win}>
-            {win.appId === WELCOME_APP.id ? (
-              <WelcomeWindow />
-            ) : win.appId === "files" ? (
-              <TreeWindow tree={tree} error={error} />
-            ) : (
-              <PlaceholderWindow app={getApp(win.appId)} />
-            )}
+            {content(win)}
           </WindowFrame>
         ))}
       </main>
-      <Dock />
+      <Dock onSearch={() => setPaletteOpen(true)} />
+      {paletteOpen && <SearchPalette onClose={() => setPaletteOpen(false)} />}
     </div>
   );
 }

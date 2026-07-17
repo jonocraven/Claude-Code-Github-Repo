@@ -8,27 +8,46 @@ export interface Bounds {
   h: number;
 }
 
+export interface WindowPayload {
+  /** Workspace-relative path for reader/viewer windows. */
+  path?: string;
+  /** Viewer kind: image | pdf | html | csv | text | other. */
+  kind?: string;
+}
+
 export interface Win {
   id: string;
   appId: string;
+  /** Distinguishes instances of one app (e.g. one Reader per document). */
+  instanceKey: string;
   title: string;
   bounds: Bounds;
   z: number;
   minimized: boolean;
   /** Bounds to restore when un-maximising; null when not maximised. */
   premax: Bounds | null;
+  payload: WindowPayload;
+}
+
+export interface OpenWindowOpts {
+  appId: string;
+  instanceKey?: string;
+  title?: string;
+  payload?: WindowPayload;
 }
 
 interface WindowState {
   windows: Win[];
   nextZ: number;
   focusedId: string | null;
+  openWindow: (opts: OpenWindowOpts) => void;
   openApp: (appId: string) => void;
   close: (id: string) => void;
   focus: (id: string) => void;
   minimize: (id: string) => void;
   toggleMaximize: (id: string) => void;
   setBounds: (id: string, bounds: Bounds) => void;
+  setTitle: (id: string, title: string) => void;
   cycle: () => void;
 }
 
@@ -60,15 +79,24 @@ function desktopSize() {
   return { dw: window.innerWidth, dh: window.innerHeight };
 }
 
-function defaultBounds(index: number): Bounds {
+function clampToDesktop(b: Bounds): Bounds {
   const { dw, dh } = desktopSize();
-  const w = Math.min(560, dw - 24);
-  const h = Math.min(440, dh - 140);
-  // Cascade new windows so they never open exactly on top of each other.
+  const w = Math.min(b.w, dw - 24);
+  const h = Math.min(b.h, dh - 130);
+  return {
+    x: Math.max(12, Math.min(b.x, dw - w - 12)),
+    y: Math.max(4, Math.min(b.y, dh - h - 84)),
+    w,
+    h,
+  };
+}
+
+function defaultBounds(index: number, wide = false): Bounds {
+  const { dw, dh } = desktopSize();
+  const w = Math.min(wide ? 760 : 560, dw - 24);
+  const h = Math.min(wide ? dh - 160 : 440, dh - 140);
   const step = 32;
-  const x = Math.max(12, Math.min(80 + index * step, dw - w - 12));
-  const y = Math.max(52, Math.min(64 + index * step, dh - h - 90));
-  return { x, y, w, h };
+  return clampToDesktop({ x: 80 + index * step, y: 64 + (index % 8) * step, w, h });
 }
 
 /** A comfortable reading size, deliberately not full-bleed (brief §3). */
@@ -86,9 +114,11 @@ export const useWindows = create<WindowState>((set, get) => ({
   nextZ: 1,
   focusedId: null,
 
-  openApp: (appId) => {
+  openWindow: ({ appId, instanceKey = "", title, payload = {} }) => {
     const { windows, nextZ } = get();
-    const existing = windows.find((w) => w.appId === appId);
+    const existing = windows.find(
+      (w) => w.appId === appId && w.instanceKey === instanceKey
+    );
     if (existing) {
       set({
         windows: windows.map((w) =>
@@ -100,18 +130,29 @@ export const useWindows = create<WindowState>((set, get) => ({
       return;
     }
     const app = getApp(appId);
+    const siblings = windows.filter((w) => w.appId === appId).length;
+    const saved = savedBounds(appId);
+    const base =
+      saved && siblings === 0
+        ? clampToDesktop(saved)
+        : defaultBounds(windows.length, appId === "reader");
+    const offset = siblings * 28;
     const id = `win-${uid++}`;
     const win: Win = {
       id,
       appId,
-      title: app.name,
-      bounds: savedBounds(appId) ?? defaultBounds(windows.length),
+      instanceKey,
+      title: title ?? app.name,
+      bounds: clampToDesktop({ ...base, x: base.x + offset, y: base.y + offset }),
       z: nextZ,
       minimized: false,
       premax: null,
+      payload,
     };
     set({ windows: [...windows, win], nextZ: nextZ + 1, focusedId: id });
   },
+
+  openApp: (appId) => get().openWindow({ appId }),
 
   close: (id) => {
     const { windows, focusedId } = get();
@@ -171,6 +212,12 @@ export const useWindows = create<WindowState>((set, get) => ({
     });
   },
 
+  setTitle: (id, title) => {
+    set({
+      windows: get().windows.map((w) => (w.id === id ? { ...w, title } : w)),
+    });
+  },
+
   cycle: () => {
     const { windows, focus } = get();
     const visible = [...windows]
@@ -181,3 +228,27 @@ export const useWindows = create<WindowState>((set, get) => ({
     focus(visible[0]!.id);
   },
 }));
+
+/** Route a workspace file to the right window type (brief §4 Files). */
+export function openFile(path: string): void {
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  const name = path.split("/").pop() ?? path;
+  const open = useWindows.getState().openWindow;
+  if (ext === "md") {
+    open({ appId: "reader", instanceKey: path, title: name, payload: { path } });
+    return;
+  }
+  const kind =
+    ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext) ? "image"
+    : ext === "pdf" ? "pdf"
+    : ext === "html" || ext === "htm" ? "html"
+    : ext === "csv" ? "csv"
+    : ["txt", "sh"].includes(ext) ? "text"
+    : "other";
+  open({
+    appId: "viewer",
+    instanceKey: path,
+    title: name,
+    payload: { path, kind },
+  });
+}
