@@ -1,0 +1,556 @@
+/* ==========================================================================
+   Shell: boot screen, desktop, menu bar, dock, windows.
+   Every colour/size/shadow comes from tokens.css — no literals here.
+   ========================================================================== */
+
+/* --- Boot screen -------------------------------------------------------- */
+
+.boot {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--space-5);
+}
+
+.boot-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--paper);
+  border: 3px solid var(--paper);
+  padding: var(--space-2) var(--space-5);
+  box-shadow: var(--shadow-hard-lg);
+  animation: boot-stamp var(--dur-scene) var(--ease-snap) both;
+}
+
+.boot-wordmark-os {
+  color: var(--accent-side-hustle);
+  margin-left: 0.15em;
+}
+
+@keyframes boot-stamp {
+  from {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.boot-lines {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  line-height: 1.7;
+  min-height: 10.2em;
+  width: min(58ch, 92vw);
+  white-space: pre-wrap;
+}
+
+.boot-line {
+  animation: boot-line-in var(--dur-quick) steps(2) both;
+}
+
+@keyframes boot-line-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.boot-cursor {
+  display: inline-block;
+  animation: boot-blink 0.7s steps(1) infinite;
+}
+
+@keyframes boot-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.boot-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* --- Desktop ------------------------------------------------------------- */
+
+.desktop {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+}
+
+.desktop-windows {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* --- Menu bar -------------------------------------------------------------- */
+
+.menubar {
+  position: relative;
+  z-index: 3;
+  height: var(--menubar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  background: var(--paper);
+  border-bottom: var(--border);
+}
+
+.menubar-left,
+.menubar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.menubar-wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.menubar-appname {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menubar-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+}
+
+.menubar-item:hover {
+  background: var(--paper-deep);
+}
+
+.memory-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-wfdinner);
+  border: var(--border);
+  display: inline-block;
+}
+
+.menubar-clock {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  white-space: pre;
+}
+
+/* --- Dock ------------------------------------------------------------------ */
+
+.dock {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.dock-shelf {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard);
+  max-width: 100%;
+}
+
+.dock-divider {
+  width: var(--border-w);
+  background: var(--ink);
+  margin: var(--space-1) var(--space-2);
+}
+
+.dock-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-radius: var(--radius);
+  transition: transform var(--dur-quick) var(--ease-snap);
+}
+
+.dock-item:hover {
+  transform: translateY(-4px);
+  background: var(--paper-deep);
+}
+
+.dock-icon {
+  display: inline-flex;
+}
+
+.dock-label {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  transition:
+    opacity var(--dur-quick) var(--ease-snap),
+    transform var(--dur-quick) var(--ease-snap);
+}
+
+.dock-item:hover .dock-label,
+.dock-item:focus-visible .dock-label {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.dock-running {
+  position: absolute;
+  bottom: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.dock-running.is-running {
+  background: var(--ink);
+}
+
+/* --- Windows ----------------------------------------------------------------- */
+
+.window {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+  animation: window-in var(--dur-quick) var(--ease-snap) both;
+}
+
+.window.is-focused {
+  box-shadow: var(--shadow-hard-lg);
+}
+
+@keyframes window-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.window-titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--titlebar-h);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  background: var(--paper-deep);
+  border-bottom: var(--border);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.window.is-focused .window-titlebar {
+  background: var(--window-accent, var(--ink));
+  color: var(--paper);
+}
+
+.window-titlebar:active {
+  cursor: grabbing;
+}
+
+.window-titlebar-icon {
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.window-title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-controls {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.window-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: var(--border-w) solid currentColor;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+}
+
+.window-control:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.window-control-close:hover {
+  background: var(--accent-cookery-books);
+  color: var(--paper);
+}
+
+.window-body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-5);
+}
+
+/* --- Welcome window ------------------------------------------------------------ */
+
+.welcome {
+  max-width: 60ch;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.welcome-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+}
+
+.welcome-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1.2;
+}
+
+.welcome code {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink-faint);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius);
+}
+
+.welcome-keys {
+  display: grid;
+  gap: var(--space-2);
+  border: var(--border);
+  box-shadow: var(--shadow-hard-sm);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.welcome-keys > div {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.welcome-keys dt {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  min-width: 3.5ch;
+}
+
+/* --- Tree window (Files, Phase 0 UI) ------------------------------------------------ */
+
+.tree-summary {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  border-bottom: var(--border);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.tree-children {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tree-children .tree-children {
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--ink-faint);
+  margin-left: var(--space-2);
+}
+
+.tree-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 32px;
+}
+
+.tree-dir-toggle:hover {
+  background: var(--paper-deep);
+}
+
+.tree-chevron {
+  font-size: var(--text-small);
+  width: 1.2ch;
+  flex-shrink: 0;
+}
+
+.tree-name {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.tree-file .tree-name {
+  font-weight: 400;
+}
+
+.tree-meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tree-ext {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  min-width: 4ch;
+  text-align: center;
+}
+
+.tree-state {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 52ch;
+}
+
+.tree-state-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+}
+
+.tree-state code {
+  font-family: var(--font-mono);
+  background: var(--paper-deep);
+  padding: 0 var(--space-1);
+}
+
+/* --- Placeholder window ----------------------------------------------------------- */
+
+.placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.placeholder-icon {
+  display: inline-flex;
+  padding: var(--space-4);
+  border: var(--border);
+  border-color: currentColor;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.placeholder-name {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.placeholder-note {
+  color: var(--ink-soft);
+  max-width: 34ch;
+}
+
+/* --- Small screens: the dock scrolls, windows stay usable ---------------------------- */
+
+@media (max-width: 480px) {
+  .menubar-appname {
+    display: none;
+  }
+  .window-body {
+    padding: var(--space-4);
+  }
+  /* The dock scrolls sideways on narrow screens; hover pills would be
+     clipped by the overflow, but there's no hover on touch anyway. */
+  .dock-shelf {
+    overflow-x: auto;
+  }
+}

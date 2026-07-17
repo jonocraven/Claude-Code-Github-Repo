@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Heaton OS design tokens — the single source of truth (brief §7, §12).
+   A future theme is a swap of this file; components never hard-code values.
+   ========================================================================== */
+
+:root {
+  /* --- Ground and ink ----------------------------------------------- */
+  --paper: #faf6ee;
+  --paper-deep: #f3ecdd;
+  --ink: #1c1814;
+  --ink-soft: #4a4238;
+  --ink-faint: #8a8072;
+
+  /* --- Per-space accents (brief §5) ---------------------------------- */
+  --accent-cookery-books: #d8452b; /* tomato red   */
+  --accent-wfdinner: #4e7a3a;      /* basil green  */
+  --accent-home: #c9821b;          /* ochre        */
+  --accent-house-move: #53708e;    /* slate blue   */
+  --accent-job-search: #4b3a8c;    /* ink violet   */
+  --accent-finances: #2e5d3e;      /* forest green */
+  --accent-side-hustle: #e05c96;   /* candy pink   */
+  --accent-life-plan: #857d6f;     /* warm grey    */
+  --accent-system: #1c1814;        /* system apps run on ink */
+
+  /* --- Borders and shadows ------------------------------------------ */
+  --border-w: 2px;
+  --border: var(--border-w) solid var(--ink);
+  --shadow-hard: 4px 4px 0 var(--ink);
+  --shadow-hard-lg: 6px 6px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+  --radius: 2px;
+  --radius-lg: 6px;
+
+  /* --- Type ----------------------------------------------------------- */
+  --font-display: "Archivo Black", "Arial Black", sans-serif;
+  --font-ui: "Space Grotesk", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --text-body: 1rem;        /* ≥16px, always */
+  --text-small: 0.875rem;   /* metadata only, never body copy */
+  --text-title: 1.125rem;
+  --text-display: 1.5rem;
+
+  /* --- Spacing -------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* --- Chrome sizes ---------------------------------------------------- */
+  --menubar-h: 40px;
+  --dock-h: 76px;
+  --titlebar-h: 40px;
+  --tap-target: 44px;
+
+  /* --- Focus ------------------------------------------------------------ */
+  --focus-ring: 3px solid var(--accent-job-search);
+  --focus-offset: 2px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  --dur-quick: 140ms;
+  --dur-scene: 320ms;
+}
