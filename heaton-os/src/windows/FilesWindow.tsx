@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { formatDate, postAction, type TreeDir, type TreeNode } from "../api";
-import { openFile, useWindows } from "../store/windows";
+import { openFile, useTabs } from "../store/tabs";
 
 type SortMode = "name" | "modified";
 
@@ -161,7 +161,7 @@ export function FilesWindow({
   scope?: string;
 }) {
   const [sort, setSort] = useState<SortMode>("name");
-  const revealPath = useWindows((s) => s.revealPath);
+  const revealPath = useTabs((s) => s.revealPath);
 
   if (error) {
     return (

@@ -12,7 +12,7 @@ import {
 import { SPACE_CONFIG, SPACE_HAS_SECTION, type Panel } from "../spaces";
 import { TaskList } from "../components/TaskList";
 import { filesIn, nodeAt, recentUnder } from "../tree-utils";
-import { openFile, useWindows } from "../store/windows";
+import { openFile, useTabs } from "../store/tabs";
 
 function FileChips({ files }: { files: TreeFile[] }) {
   if (files.length === 0) {
@@ -294,7 +294,7 @@ export function SpaceWindow({
   tree: TreeDir | null;
 }) {
   const [tab, setTab] = useState<"dashboard" | "files">("dashboard");
-  const reveal = useWindows((s) => s.reveal);
+  const reveal = useTabs((s) => s.reveal);
   const config = SPACE_CONFIG[spaceId];
 
   if (!config) return <p className="space-empty">Unknown space.</p>;

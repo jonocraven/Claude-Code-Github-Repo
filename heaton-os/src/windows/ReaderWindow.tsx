@@ -10,7 +10,7 @@ import {
 } from "../api";
 import { MarkdownEditor } from "../components/MarkdownEditor";
 import { useLive } from "../store/live";
-import { openFile, useWindows } from "../store/windows";
+import { openFile, useTabs } from "../store/tabs";
 
 export function ReaderWindow({
   windowId,
@@ -19,7 +19,7 @@ export function ReaderWindow({
   windowId: string;
   path: string | undefined;
 }) {
-  const setTitle = useWindows((s) => s.setTitle);
+  const setTitle = useTabs((s) => s.setTitle);
   const [doc, setDoc] = useState<FileResponse | null>(null);
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
   const [showBacklinks, setShowBacklinks] = useState(false);

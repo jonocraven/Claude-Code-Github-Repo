@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchMemoryHealth, type MemoryGauge, type MemoryHealth } from "../api";
-import { openFile } from "../store/windows";
+import { openFile } from "../store/tabs";
 
 function Bar({ label, pct, ceiling, value }: { label: string; pct: number; ceiling: number; value: number }) {
   return (

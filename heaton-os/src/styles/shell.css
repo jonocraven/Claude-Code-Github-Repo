@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Shell: boot screen, desktop, menu bar, dock, windows.
+   Shell: boot screen, sidebar, top bar, tabbed content panes.
    Every colour/size/shadow comes from tokens.css — no literals here.
    ========================================================================== */
 
@@ -85,284 +85,6 @@
   color: var(--ink-faint);
   text-transform: uppercase;
   letter-spacing: 0.2em;
-}
-
-/* --- Desktop ------------------------------------------------------------- */
-
-.desktop {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--paper);
-}
-
-.desktop-windows {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
-  z-index: 1;
-}
-
-/* --- Menu bar -------------------------------------------------------------- */
-
-.menubar {
-  position: relative;
-  z-index: 3;
-  height: var(--menubar-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-4);
-  background: var(--paper);
-  border-bottom: var(--border);
-}
-
-.menubar-left,
-.menubar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-.menubar-wordmark {
-  font-family: var(--font-display);
-  font-size: var(--text-body);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.menubar-appname {
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.menubar-item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  border-radius: var(--radius);
-}
-
-.menubar-item:hover {
-  background: var(--paper-deep);
-}
-
-.memory-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-wfdinner);
-  border: var(--border);
-  display: inline-block;
-}
-
-.menubar-clock {
-  font-family: var(--font-mono);
-  font-size: var(--text-small);
-  white-space: pre;
-}
-
-/* --- Dock ------------------------------------------------------------------ */
-
-.dock {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  justify-content: center;
-  padding: 0 var(--space-3) var(--space-3);
-}
-
-.dock-shelf {
-  display: flex;
-  align-items: stretch;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  background: var(--paper);
-  border: var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-hard);
-  max-width: 100%;
-}
-
-.dock-divider {
-  width: var(--border-w);
-  background: var(--ink);
-  margin: var(--space-1) var(--space-2);
-}
-
-.dock-item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--tap-target);
-  min-height: var(--tap-target);
-  padding: var(--space-1) var(--space-2) var(--space-2);
-  border-radius: var(--radius);
-  transition: transform var(--dur-quick) var(--ease-snap);
-}
-
-.dock-item:hover {
-  transform: translateY(-4px);
-  background: var(--paper-deep);
-}
-
-.dock-icon {
-  display: inline-flex;
-}
-
-.dock-label {
-  position: absolute;
-  bottom: calc(100% + var(--space-2));
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
-  opacity: 0;
-  pointer-events: none;
-  white-space: nowrap;
-  font-family: var(--font-ui);
-  font-size: var(--text-small);
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--paper);
-  border: var(--border);
-  box-shadow: var(--shadow-hard-sm);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius);
-  transition:
-    opacity var(--dur-quick) var(--ease-snap),
-    transform var(--dur-quick) var(--ease-snap);
-}
-
-.dock-item:hover .dock-label,
-.dock-item:focus-visible .dock-label {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-}
-
-.dock-running {
-  position: absolute;
-  bottom: 3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: transparent;
-}
-
-.dock-running.is-running {
-  background: var(--ink);
-}
-
-/* --- Windows ----------------------------------------------------------------- */
-
-.window {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  background: var(--paper);
-  border: var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-hard);
-  overflow: hidden;
-  animation: window-in var(--dur-quick) var(--ease-snap) both;
-}
-
-.window.is-focused {
-  box-shadow: var(--shadow-hard-lg);
-}
-
-@keyframes window-in {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.window-titlebar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  height: var(--titlebar-h);
-  padding: 0 var(--space-2) 0 var(--space-3);
-  background: var(--paper-deep);
-  border-bottom: var(--border);
-  cursor: grab;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.window.is-focused .window-titlebar {
-  background: var(--window-accent, var(--ink));
-  color: var(--paper);
-}
-
-.window-titlebar:active {
-  cursor: grabbing;
-}
-
-.window-titlebar-icon {
-  width: 10px;
-  height: 10px;
-  background: currentColor;
-  flex-shrink: 0;
-}
-
-.window-title {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: var(--text-small);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.window-controls {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.window-control {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: var(--border-w) solid currentColor;
-  border-radius: var(--radius);
-  background: transparent;
-  color: inherit;
-}
-
-.window-control:hover {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.window-control-close:hover {
-  background: var(--accent-cookery-books);
-  color: var(--paper);
-}
-
-.window-body {
-  flex: 1;
-  overflow: auto;
-  padding: var(--space-5);
 }
 
 /* --- Welcome window ------------------------------------------------------------ */
@@ -537,22 +259,6 @@
 .placeholder-note {
   color: var(--ink-soft);
   max-width: 34ch;
-}
-
-/* --- Small screens: the dock scrolls, windows stay usable ---------------------------- */
-
-@media (max-width: 480px) {
-  .menubar-appname {
-    display: none;
-  }
-  .window-body {
-    padding: var(--space-4);
-  }
-  /* The dock scrolls sideways on narrow screens; hover pills would be
-     clipped by the overflow, but there's no hover on touch anyway. */
-  .dock-shelf {
-    overflow-x: auto;
-  }
 }
 
 /* --- Files toolbar --------------------------------------------------------- */
@@ -2040,24 +1746,376 @@ a.ref-unresolved {
   text-align: center;
 }
 
-/* --- Dock stagger entrance (brief §7 orchestrated entrance) -------------- */
-.dock-item {
-  animation: dock-rise var(--dur-scene) var(--ease-snap) both;
-  animation-delay: calc(var(--i, 0) * 40ms + 200ms);
+
+/* ==========================================================================
+   Dashboard shell — sidebar + top bar + tabbed content panes
+   ========================================================================== */
+
+.shell {
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background-color: var(--paper);
+  /* Paper grain sits behind everything; opaque panels cover it, and the
+     transparent pane bodies let it show through under the content. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
-@keyframes dock-rise {
-  from {
-    transform: translateY(14px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* --- Sidebar ------------------------------------------------------------- */
+
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  background: var(--paper-deep);
+  border-right: var(--border);
+  overflow-y: auto;
+  transition: width var(--dur-quick) var(--ease-snap);
 }
 
-/* The hover lift must win once the entrance has played. */
-.dock-item:hover {
-  animation: none;
+.sidebar.is-collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+.sidebar-brand {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.sidebar-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-wordmark-os {
+  color: var(--accent-side-hustle);
+  margin-left: 0.15em;
+}
+
+.is-collapsed .sidebar-wordmark {
+  display: none;
+}
+.is-collapsed .sidebar-brand::after {
+  content: "H";
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.sidebar-heading {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  padding: var(--space-3) var(--space-3) var(--space-1);
+}
+.is-collapsed .sidebar-heading {
+  text-align: center;
+  padding: var(--space-2) 0 var(--space-1);
+  overflow: hidden;
+}
+.is-collapsed .sidebar-heading::first-letter {
+  font-size: inherit;
+}
+
+.nav-list {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+
+.nav-item:hover {
+  background: var(--paper);
+}
+
+.nav-item.is-active {
+  background: var(--paper);
+  box-shadow:
+    inset 3px 0 0 var(--nav-accent, var(--ink)),
+    var(--shadow-hard-sm);
+  font-weight: 700;
+}
+
+.nav-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--nav-accent, var(--ink));
+}
+
+.nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-search {
+  margin-bottom: var(--space-1);
+}
+
+.nav-kbd {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+}
+
+.is-collapsed .nav-item {
+  justify-content: center;
+  padding: var(--space-2);
+}
+.is-collapsed .nav-label,
+.is-collapsed .nav-kbd {
+  display: none;
+}
+
+.sidebar-collapse {
+  margin-top: auto;
+  align-self: flex-end;
+  width: 34px;
+  height: 34px;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-family: var(--font-mono);
+}
+.sidebar-collapse:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.is-collapsed .sidebar-collapse {
+  align-self: center;
+}
+
+/* --- Main column: top bar + content -------------------------------------- */
+
+.main {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: var(--topbar-h) 1fr;
+  /* Constrain the implicit column so rows can't grow to content width. */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  background: var(--paper);
+  border-bottom: var(--border);
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.topbar-btn:hover {
+  background: var(--paper-deep);
+}
+.topbar-btn.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.topbar-clock {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  white-space: pre;
+  margin-left: var(--space-2);
+}
+
+/* memory dot (shared with the Memory Monitor states below) */
+.memory-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: var(--border);
+  display: inline-block;
+  background: var(--accent-wfdinner);
+}
+
+/* --- Content, panes, tab strip ------------------------------------------- */
+
+.content {
+  min-height: 0;
+  display: flex;
+}
+
+.pane {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: var(--tabstrip-h) 1fr;
+  min-height: 0;
+}
+
+.content.is-split .pane:first-child {
+  border-right: var(--border);
+}
+
+.tabstrip {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: var(--tabstrip-h);
+  padding: var(--space-1) var(--space-2) 0;
+  background: var(--paper-deep);
+  border-bottom: var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabstrip::-webkit-scrollbar {
+  display: none;
+}
+
+.pane.is-active-pane .tabstrip {
+  box-shadow: inset 0 3px 0 var(--accent-job-search);
+}
+
+.doctab {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--space-1) 0 var(--space-2);
+  border: var(--border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--paper-deep);
+  max-width: 220px;
+  min-width: 0;
+  margin-bottom: -2px;
+}
+
+.doctab.is-active {
+  background: var(--paper);
+}
+
+.doctab-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) 0;
+}
+
+.doctab-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+}
+
+.doctab-title {
+  font-size: var(--text-small);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doctab-split,
+.doctab-close {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  opacity: 0;
+}
+.doctab:hover .doctab-split,
+.doctab:hover .doctab-close,
+.doctab.is-active .doctab-close {
+  opacity: 1;
+}
+.doctab-split:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.doctab-close:hover {
+  background: var(--accent-cookery-books);
+  color: var(--paper);
+}
+
+.pane-body {
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-5);
+}
+
+/* --- Narrow screens: sidebar collapses to icons, split stacks ------------ */
+@media (max-width: 720px) {
+  .sidebar {
+    width: var(--sidebar-w-collapsed);
+  }
+  .sidebar .nav-label,
+  .sidebar .nav-kbd,
+  .sidebar-wordmark {
+    display: none;
+  }
+  .sidebar-brand::after {
+    content: "H";
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: var(--space-2);
+  }
+  .content.is-split {
+    flex-direction: column;
+  }
+  .content.is-split .pane:first-child {
+    border-right: none;
+    border-bottom: var(--border);
+  }
+  .pane-body {
+    padding: var(--space-4);
+  }
+  /* Dense dashboards collapse to a single column so nothing overflows. */
+  .space-dashboard,
+  .memory-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .space-head,
+  .memory-head {
+    flex-wrap: wrap;
+  }
 }

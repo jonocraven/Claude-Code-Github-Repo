@@ -1,23 +1,11 @@
 import { useEffect, useState } from "react";
 import type { TreeDir } from "../api";
-import { getApp, WELCOME_APP } from "../apps";
-import { useWindows } from "../store/windows";
-import { Dock } from "./Dock";
-import { MenuBar } from "./MenuBar";
+import { useTabs } from "../store/tabs";
+import { ContentArea } from "./ContentArea";
 import { KeymapOverlay } from "./KeymapOverlay";
 import { SearchPalette } from "./SearchPalette";
-import { WindowFrame } from "./WindowFrame";
-import { ActivityWindow } from "../windows/ActivityWindow";
-import { CalendarWindow } from "../windows/CalendarWindow";
-import { FilesWindow } from "../windows/FilesWindow";
-import { MemoryWindow } from "../windows/MemoryWindow";
-import { PlaceholderWindow } from "../windows/PlaceholderWindow";
-import { ReaderWindow } from "../windows/ReaderWindow";
-import { SpaceWindow } from "../windows/SpaceWindow";
-import { TasksWindow } from "../windows/TasksWindow";
-import { ViewerWindow } from "../windows/ViewerWindow";
-import { WelcomeWindow } from "../windows/WelcomeWindow";
-import { SPACE_CONFIG } from "../spaces";
+import { Sidebar } from "./Sidebar";
+import { TopBar } from "./TopBar";
 
 export function Desktop({
   tree,
@@ -26,18 +14,16 @@ export function Desktop({
   tree: TreeDir | null;
   error: string | null;
 }) {
-  const windows = useWindows((s) => s.windows);
-  const openApp = useWindows((s) => s.openApp);
-  const close = useWindows((s) => s.close);
-  const cycle = useWindows((s) => s.cycle);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [keymapOpen, setKeymapOpen] = useState(false);
 
-  // First scene: Welcome and the live Files window.
+  // First run (no restored tabs): open Welcome alongside Files.
   useEffect(() => {
-    openApp("files");
-    openApp(WELCOME_APP.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const { tabs, openApp, openTab } = useTabs.getState();
+    if (tabs.length === 0) {
+      openApp("files");
+      openTab({ appId: "welcome", title: "Welcome" });
+    }
   }, []);
 
   useEffect(() => {
@@ -48,64 +34,38 @@ export function Desktop({
       }
       if (!e.metaKey && !e.ctrlKey) return;
       const key = e.key.toLowerCase();
+      const store = useTabs.getState();
       if (key === "k") {
         e.preventDefault();
         setPaletteOpen((o) => !o);
       } else if (key === "/") {
         e.preventDefault();
         setKeymapOpen((o) => !o);
+      } else if (key === "\\") {
+        e.preventDefault();
+        store.toggleSplit();
       } else if (key === "w") {
-        const { focusedId } = useWindows.getState();
-        if (focusedId) {
+        const activeId = store.activePane === "right" ? store.activeRight : store.activeLeft;
+        if (activeId) {
           e.preventDefault();
-          close(focusedId);
+          store.closeTab(activeId);
         }
       } else if (e.key === "`") {
         e.preventDefault();
-        cycle();
+        store.cycle();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [close, cycle]);
-
-  const content = (win: (typeof windows)[number]) => {
-    switch (win.appId) {
-      case WELCOME_APP.id:
-        return <WelcomeWindow />;
-      case "files":
-        return <FilesWindow tree={tree} error={error} />;
-      case "reader":
-        return <ReaderWindow windowId={win.id} path={win.payload.path} />;
-      case "viewer":
-        return <ViewerWindow path={win.payload.path} kind={win.payload.kind} />;
-      case "tasks":
-        return <TasksWindow />;
-      case "calendar":
-        return <CalendarWindow />;
-      case "memory":
-        return <MemoryWindow />;
-      case "activity":
-        return <ActivityWindow />;
-      default:
-        if (SPACE_CONFIG[win.appId]) {
-          return <SpaceWindow spaceId={win.appId} tree={tree} />;
-        }
-        return <PlaceholderWindow app={getApp(win.appId)} />;
-    }
-  };
+  }, []);
 
   return (
-    <div className="desktop paper-grain">
-      <MenuBar onSearch={() => setPaletteOpen(true)} />
-      <main className="desktop-windows" aria-label="Windows">
-        {windows.map((win) => (
-          <WindowFrame key={win.id} win={win}>
-            {content(win)}
-          </WindowFrame>
-        ))}
-      </main>
-      <Dock onSearch={() => setPaletteOpen(true)} />
+    <div className="shell">
+      <Sidebar onSearch={() => setPaletteOpen(true)} />
+      <div className="main paper-grain">
+        <TopBar onSearch={() => setPaletteOpen(true)} />
+        <ContentArea tree={tree} error={error} />
+      </div>
       {paletteOpen && <SearchPalette onClose={() => setPaletteOpen(false)} />}
       {keymapOpen && <KeymapOverlay onClose={() => setKeymapOpen(false)} />}
     </div>

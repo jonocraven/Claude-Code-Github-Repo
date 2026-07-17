@@ -30,13 +30,17 @@ Vite dev server together, and opens the browser.
   with the ignore list (`.DS_Store`, Drive temp folders, `.obsidian`,
   `.claude`, `__pycache__`, `node_modules`), returning per-node file counts
   and latest-modified dates.
-- **Phase 1 — Shell.** Boot screen (skippable, honours
-  `prefers-reduced-motion`), cream paper-grain desktop, menu bar (wordmark,
-  memory dot placeholder, DD-MM-YYYY clock), dock with the eight space apps +
-  system apps (placeholder SVG icons — the hand-crafted set is Phase 6),
-  and the window manager: drag, resize, z-order, minimise to dock, close,
-  double-click/⌘-button maximise to a comfortable reading size, per-app
-  position persistence, ⌘W close, ⌘` cycle.
+- **Shell — dashboard layout.** Boot screen (skippable, honours
+  `prefers-reduced-motion`), then a dashboard: a left nav rail (brand, the
+  eight spaces, system tools; collapsible to icons), a top bar (active title,
+  search, live memory dot, DD-MM-YYYY clock), and a content area that gives
+  the whole width to what you're reading. Apps and documents open as **tabs**,
+  never overlapping windows; any tab can be sent to an optional **right pane**
+  for side-by-side reading (⌘\\). Open tabs and the split state persist to
+  localStorage. ⌘K search, ⌘W close tab, ⌘` cycle, ⌘/ shortcuts.
+  _(This replaced the original draggable-window desktop — the content
+  components and all functionality were unchanged; only the presentation
+  shell was swapped.)_
 - **Phase 2 — Files + Reader.** Files browses the tree (A–Z / Recent sort)
   and routes every file type: markdown to the Reader, images/PDF/HTML/CSV to
   their viewers, anything else to reveal/open-in-default-app. The Reader

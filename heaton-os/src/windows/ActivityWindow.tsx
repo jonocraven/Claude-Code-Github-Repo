@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchRecent, type ActivityDay } from "../api";
-import { openFile } from "../store/windows";
+import { openFile } from "../store/tabs";
 
 // Space id per area name, to tint the badge on the space palette.
 const AREA_ACCENT: Record<string, string> = {

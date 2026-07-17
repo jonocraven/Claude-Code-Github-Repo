@@ -53,9 +53,10 @@
   --space-6: 32px;
 
   /* --- Chrome sizes ---------------------------------------------------- */
-  --menubar-h: 40px;
-  --dock-h: 76px;
-  --titlebar-h: 40px;
+  --sidebar-w: 232px;
+  --sidebar-w-collapsed: 64px;
+  --topbar-h: 52px;
+  --tabstrip-h: 40px;
   --tap-target: 44px;
 
   /* --- Focus ------------------------------------------------------------ */

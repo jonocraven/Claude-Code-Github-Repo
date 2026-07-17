@@ -1,7 +1,8 @@
 const SHORTCUTS: { keys: string; action: string }[] = [
   { keys: "⌘K", action: "Search documents & apps" },
-  { keys: "⌘W", action: "Close the focused window" },
-  { keys: "⌘`", action: "Cycle windows" },
+  { keys: "⌘\\", action: "Split / unsplit the view" },
+  { keys: "⌘W", action: "Close the active tab" },
+  { keys: "⌘`", action: "Cycle tabs in the pane" },
   { keys: "⌘S", action: "Save (while editing)" },
   { keys: "⌘/", action: "Show this map" },
   { keys: "Esc", action: "Dismiss search or this map" },

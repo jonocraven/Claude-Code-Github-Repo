@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchSearch, type SearchResponse } from "../api";
 import { APPS, type AppDef } from "../apps";
 import { AppIcon } from "../icons";
-import { openFile, useWindows } from "../store/windows";
+import { openFile, useTabs } from "../store/tabs";
 
 const SPACES = APPS.filter((a) => a.kind === "space");
 
-/** Dock space ids ↔ workspace folder names (Spaces/<folder>). */
+/** Space ids ↔ workspace folder names (Spaces/<folder>). */
 const SPACE_FOLDER: Record<string, string> = {
   "cookery-books": "Cookery-Books",
   wfdinner: "WFDinner",
@@ -24,7 +24,7 @@ interface Entry {
 }
 
 export function SearchPalette({ onClose }: { onClose: () => void }) {
-  const openApp = useWindows((s) => s.openApp);
+  const openApp = useTabs((s) => s.openApp);
   const [query, setQuery] = useState("");
   const [space, setSpace] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResponse | null>(null);

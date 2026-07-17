@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchScheduled, type ScheduledEvent } from "../api";
-import { useWindows } from "../store/windows";
+import { useTabs } from "../store/tabs";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -19,7 +19,7 @@ const CADENCE_ACCENT: Record<string, string> = {
 };
 
 export function CalendarWindow() {
-  const reveal = useWindows((s) => s.reveal);
+  const reveal = useTabs((s) => s.reveal);
   const today = useMemo(() => new Date(), []);
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1); // 1-based
