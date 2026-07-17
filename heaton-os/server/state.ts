@@ -27,6 +27,21 @@ export function getState(): AppState {
   return state;
 }
 
+// Change broadcast (brief §2.2): the watcher collects the workspace-relative
+// paths that moved during a debounce window and, once the indexes are rebuilt,
+// hands them to every subscriber (the WebSocket) so open windows live-update.
+export type ChangeListener = (paths: string[]) => void;
+const listeners = new Set<ChangeListener>();
+
+export function onChange(listener: ChangeListener): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function emitChange(paths: string[]): void {
+  for (const listener of listeners) listener(paths);
+}
+
 async function rebuild(): Promise<void> {
   const corpus = await scanCorpus(WORKSPACE_ROOT);
   state = {
@@ -48,12 +63,22 @@ export async function initState(): Promise<{ files: number; docs: number }> {
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 400, pollInterval: 100 },
   });
-  watcher.on("all", () => {
+
+  const pending = new Set<string>();
+  watcher.on("all", (_event, changed) => {
+    if (changed) {
+      pending.add(path.relative(WORKSPACE_ROOT, changed).split(path.sep).join("/"));
+    }
     // Debounced full rebuild — ~275 md files, cheap; Drive sync storms of
-    // events collapse into one pass.
+    // events collapse into one pass, then a single broadcast.
     if (rebuildTimer) clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(() => {
-      void rebuild().then(() => buildSemanticIndex(getState().corpus));
+      const paths = [...pending];
+      pending.clear();
+      void rebuild().then(() => {
+        emitChange(paths);
+        void buildSemanticIndex(getState().corpus);
+      });
     }, 800);
   });
 

@@ -46,8 +46,12 @@ Vite dev server together, and opens the browser.
   filenames resolved doc-dir → space root → workspace root; unresolvable
   refs get a dotted marker, never a guess), and carries a collapsible
   backlinks panel. HTML artefacts render in sandboxed iframes; CSVs become
-  sortable grids. The server watches the workspace (chokidar, debounced)
-  and rebuilds its indexes on change.
+  sortable grids. The server watches the workspace (chokidar, debounced),
+  rebuilds its indexes on change, and pushes the changed paths over a
+  WebSocket (`/api/live`) so open Files and Reader windows live-update when a
+  file changes on disk — a Drive sync or another Claude session — without a
+  reload. (The Reader holds off while you're mid-edit; the save-time conflict
+  guard protects the draft.)
 - **Phase 3 — Search.** ⌘K palette: MiniSearch keyword index
   (title/headings/body/path) with highlighted snippets, per-space filter
   chips, app-launcher behaviour ("job" ↵ opens Job Search), full keyboard

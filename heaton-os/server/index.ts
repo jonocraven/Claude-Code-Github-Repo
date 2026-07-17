@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import websocket from "@fastify/websocket";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import { execFile } from "node:child_process";
@@ -7,7 +8,7 @@ import { HOST, PORT, WORKSPACE_ROOT } from "./config.js";
 import { buildTree } from "./tree.js";
 import { safeAbsolute } from "./paths.js";
 import { renderMarkdown } from "./markdown.js";
-import { getState, initState } from "./state.js";
+import { getState, initState, onChange } from "./state.js";
 import { searchKeyword } from "./search.js";
 import { searchSemantic, semanticStatus } from "./semantic.js";
 import { memoryHealth } from "./memory.js";
@@ -20,6 +21,24 @@ import { completeTask, plate, sectionTasks } from "./todoist.js";
 setGlobalDispatcher(new EnvHttpProxyAgent());
 
 const app = Fastify({ logger: false });
+await app.register(websocket);
+
+// Live-update channel (brief §2.2): every connected client is told which
+// workspace paths changed so open windows can refetch. Kept trivially small —
+// the client decides what to reload.
+const sockets = new Set<import("@fastify/websocket").WebSocket>();
+onChange((paths) => {
+  const message = JSON.stringify({ type: "change", paths });
+  for (const ws of sockets) {
+    if (ws.readyState === ws.OPEN) ws.send(message);
+  }
+});
+
+app.get("/api/live", { websocket: true }, (socket) => {
+  sockets.add(socket);
+  socket.on("close", () => sockets.delete(socket));
+  socket.on("error", () => sockets.delete(socket));
+});
 
 const IMAGE_EXT: Record<string, string> = {
   png: "image/png",

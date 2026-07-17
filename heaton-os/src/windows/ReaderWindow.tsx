@@ -9,6 +9,7 @@ import {
   type FileResponse,
 } from "../api";
 import { MarkdownEditor } from "../components/MarkdownEditor";
+import { useLive } from "../store/live";
 import { openFile, useWindows } from "../store/windows";
 
 export function ReaderWindow({
@@ -33,6 +34,8 @@ export function ReaderWindow({
     { kind: "idle" | "saving" | "saved" } | { kind: "conflict" | "error"; message: string }
   >({ kind: "idle" });
   const baseModified = useRef<string>("");
+  const liveSeq = useLive((s) => s.seq);
+  const liveChanged = useLive((s) => s.changed);
 
   useEffect(() => {
     if (!path) return;
@@ -52,6 +55,28 @@ export function ReaderWindow({
       cancelled = true;
     };
   }, [path, windowId, setTitle]);
+
+  // Live-update: if this document changed on disk (brief §2.2), refresh it —
+  // unless we're editing, where the save-time conflict guard protects the draft.
+  useEffect(() => {
+    if (!path || editing || liveSeq === 0) return;
+    if (!liveChanged.includes(path)) return;
+    let cancelled = false;
+    fetchFile(path)
+      .then((d) => {
+        if (cancelled) return;
+        setDoc(d);
+        baseModified.current = d.modified;
+      })
+      .catch(() => undefined);
+    fetchBacklinks(path)
+      .then((b) => !cancelled && setBacklinks(b))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveSeq]);
 
   // Cross-references open the target in a new window (brief §6).
   useEffect(() => {
