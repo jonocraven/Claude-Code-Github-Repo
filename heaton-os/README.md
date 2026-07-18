@@ -6,22 +6,26 @@
 
 Built from `heaton-os-build-brief-17-07-2026.md`.
 
-## Getting started (on the Mac)
+## Quick start
 
 ```bash
-# Clone the repo somewhere OUTSIDE the workspace — never inside
-# /Users/jonathancraven/Claude (it's Drive-synced; see brief §2.1).
-mkdir -p ~/Projects
-git clone <this-repo> ~/Projects/heaton-os-repo
-cd ~/Projects/heaton-os-repo/heaton-os
-
+cd /Users/jonathancraven/developer
+git clone https://github.com/jonocraven/Claude-Code-Github-Repo.git heaton-os-repo
+cd heaton-os-repo/heaton-os
 npm install
-cp .env.example .env   # defaults already point at /Users/jonathancraven/Claude
-npm run os             # starts the server + opens the browser
+cp .env.example .env
+npm run os
 ```
 
-`npm run os` runs the Fastify API (127.0.0.1:4400, loopback only) and the
-Vite dev server together, and opens the browser.
+This clones the repo, installs dependencies, configures your environment, and starts the dev server with the browser open.
+
+`npm run os` runs the Fastify API (127.0.0.1:4400, loopback only) and the Vite dev server together.
+
+## Getting started (on the Mac)
+
+Clone the repo somewhere OUTSIDE the workspace — never inside `/Users/jonathancraven/Claude` (it's Drive-synced; see brief §2.1).
+
+The defaults in `.env.example` already point at `/Users/jonathancraven/Claude`, so no additional configuration is needed for the real workspace.
 
 ## What exists so far
 
