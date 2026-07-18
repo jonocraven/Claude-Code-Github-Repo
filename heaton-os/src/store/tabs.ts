@@ -106,8 +106,21 @@ function firstIn(tabs: Tab[], pane: Pane): string | null {
   return tabs.find((t) => t.pane === pane)?.id ?? null;
 }
 
+// Restored tabs keep their old "tab-N" ids; the in-memory counter must resume
+// past the highest of them, or a freshly opened tab can collide with one
+// restored from localStorage (same id used by two different tabs at once).
+function nextUidAfter(tabs: Tab[]): number {
+  let max = -1;
+  for (const t of tabs) {
+    const n = Number(t.id.match(/^tab-(\d+)$/)?.[1]);
+    if (Number.isFinite(n) && n > max) max = n;
+  }
+  return max + 1;
+}
+
 export const useTabs = create<TabState>((set, get) => {
   const persisted = load();
+  uid = nextUidAfter(persisted.tabs ?? []);
 
   // A helper that commits state and mirrors it to localStorage.
   const commit = (partial: Partial<TabState>) => {

@@ -387,6 +387,8 @@
   background: var(--paper-deep);
   padding: var(--space-4);
   max-width: var(--reader-measure);
+  width: 100%;
+  margin-inline: auto;
 }
 
 .frontmatter-row {
@@ -420,12 +422,16 @@
   padding: 0 0.3ch;
 }
 
-/* The text column: quiet, literary, generous measure (brief §6/§7). */
+/* The text column: quiet, literary, generous measure (brief §6/§7).
+   Centered so the measure reads as a deliberate column, not text stranded
+   flush-left with the rest of a wide pane left dead. */
 .reader-body {
   font-family: var(--font-reading);
   font-size: 1.0625rem;
   line-height: 1.65;
   max-width: var(--reader-measure);
+  width: 100%;
+  margin-inline: auto;
 }
 
 .reader-body h1,
@@ -552,6 +558,9 @@ a.ref-unresolved {
 
 .backlinks {
   margin-top: auto;
+  max-width: var(--reader-measure);
+  width: 100%;
+  margin-inline: auto;
   border-top: var(--border);
   padding-top: var(--space-2);
 }
@@ -1216,6 +1225,7 @@ a.ref-unresolved {
 .gauge-name {
   font-weight: 700;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1345,6 +1355,7 @@ a.ref-unresolved {
 
 .activity-name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1466,6 +1477,10 @@ a.ref-unresolved {
 .space-filelist {
   list-style: none;
   display: grid;
+  /* Without an explicit column, the implicit track auto-sizes to its
+     content's intrinsic width, so a long filename grows the whole list
+     (and its row) past the panel instead of being truncated inside it. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
 }
 
@@ -1474,6 +1489,7 @@ a.ref-unresolved {
   align-items: center;
   gap: var(--space-2);
   width: 100%;
+  min-width: 0;
   text-align: left;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius);
@@ -1483,6 +1499,7 @@ a.ref-unresolved {
 
 .space-filename {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1755,6 +1772,11 @@ a.ref-unresolved {
   height: 100%;
   display: grid;
   grid-template-columns: auto 1fr;
+  /* A definite row size (not the default content-based "auto") so the
+     100%-height sidebar and main column can actually stretch/shrink to fit
+     and scroll internally, instead of growing to content and being clipped
+     by the page's overflow: hidden. */
+  grid-template-rows: minmax(0, 1fr);
   background-color: var(--paper);
   /* Paper grain sits behind everything; opaque panels cover it, and the
      transparent pane bodies let it show through under the content. */
@@ -1766,6 +1788,7 @@ a.ref-unresolved {
 .sidebar {
   width: var(--sidebar-w);
   height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
