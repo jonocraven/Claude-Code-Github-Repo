@@ -1453,8 +1453,13 @@ a.ref-unresolved {
   overflow-y: auto;
 }
 
-.space-hero .reader-body {
+/* Inside a dashboard panel the measure is the panel, not a reading column —
+   don't inherit the Reader's centred gutters (they'd strand the text). */
+.space-hero .reader-body,
+.space-hero .frontmatter-card {
   font-size: 1rem;
+  max-width: none;
+  margin-inline: 0;
 }
 
 .space-hero-open {
