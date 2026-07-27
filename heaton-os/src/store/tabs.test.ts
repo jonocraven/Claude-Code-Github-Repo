@@ -356,13 +356,6 @@ describe("useTabs store", () => {
   });
 
   it("seeded persisted tabs tab-0 through tab-4 do not collide with a newly-opened tab", async () => {
-    const mem = new Map<string, string>();
-    vi.stubGlobal("localStorage", {
-      getItem: (k: string) => mem.get(k) ?? null,
-      setItem: (k: string, v: string) => void mem.set(k, v),
-      removeItem: (k: string) => void mem.delete(k),
-      clear: () => mem.clear(),
-    });
     const payload = {
       tabs: [
         {
