@@ -2,9 +2,10 @@
 
 > **What:** The Claude workspace (`/Users/jonathancraven/Claude`) rendered as a warm, print-craft desktop operating system — spaces as apps, files beautifully readable, live Todoist and scheduled-task data alongside.
 > **Why:** Navigating the workspace through Finder and raw markdown is hard work.
-> **Status:** All six phases built — scaffold, shell, Files + Reader, search, system apps, space apps, and polish (editing, icons, keyboard map).
+> **Status:** All six build phases complete, plus a repair pass and **Today** — a cross-space triage surface that answers "what's going on across everything?".
 
-Built from `heaton-os-build-brief-17-07-2026.md`.
+Built from `heaton-os-build-brief-17-07-2026.md`, then extended following a
+product audit (July 2026).
 
 ## Quick start
 
@@ -21,11 +22,94 @@ This clones the repo, installs dependencies, configures your environment, and st
 
 `npm run os` runs the Fastify API (127.0.0.1:4400, loopback only) and the Vite dev server together.
 
+## Updating — pulling new changes down
+
+Once you already have the repo cloned, this is the whole routine:
+
+```bash
+cd /Users/jonathancraven/developer/heaton-os-repo   # wherever you cloned it
+
+# Stop the running app first (Ctrl-C in the terminal running `npm run os`).
+
+git checkout main        # work lands on main; skip if you're already on it
+git pull                 # fetch and fast-forward
+
+cd heaton-os
+npm install              # safe to run every time; a no-op when nothing changed
+npm run os
+```
+
+`.env` is gitignored, so your `WORKSPACE_ROOT` and Todoist token survive a
+pull untouched. If `.env.example` gains a new key you'll need to copy it
+across by hand — `git diff HEAD@{1} -- heaton-os/.env.example` after a pull
+shows whether it changed.
+
+**Restart rather than relying on hot reload.** The Vite dev server picks up
+front-end edits live, but a pull that changes server code is cleaner with a
+full stop and start.
+
+### Two things to expect the first time
+
+**Today won't open automatically.** It's the new landing tab, but only on a
+*fresh* session — your browser has the old tab layout saved, and restoring
+your workspace takes priority over overriding it. Click **Today** at the top
+of the left rail. To get the true first-run behaviour instead, clear the
+saved layout from the browser console:
+
+```js
+localStorage.removeItem("heaton-os.tabs.v1");
+```
+
+**Tabs now behave differently.** Opening a space or a file gives you a
+*preview* tab — italic title, one per pane, replaced by the next thing you
+open. That's deliberate: browsing eight spaces used to leave eight tabs.
+Double-click a tab (or just start editing) to keep it. Your previously-saved
+tabs all restore as kept, never as previews.
+
+### If a pull goes wrong
+
+```bash
+git status                      # see what's uncommitted locally
+git stash                       # park local edits, then pull again
+npm test && npm run typecheck   # confirm the checkout is sound (89 tests)
+```
+
+If the app starts but the workspace looks empty, check `WORKSPACE_ROOT` in
+`heaton-os/.env` still points at `/Users/jonathancraven/Claude`.
+
 ## Getting started (on the Mac)
 
 Clone the repo somewhere OUTSIDE the workspace — never inside `/Users/jonathancraven/Claude` (it's Drive-synced; see brief §2.1).
 
 The defaults in `.env.example` already point at `/Users/jonathancraven/Claude`, so no additional configuration is needed for the real workspace.
+
+## What's new since the six phases
+
+- **Today** — the landing surface, top of the rail. Overdue and due-today
+  tasks, memory breaches, the day's scheduled runs, what's changed since you
+  last looked (grouped by space), what's coming up, and what's parked with
+  Claude or blocked on someone else. Cross-space by default. It composes data
+  the app already had; the value is the ranking, which lives in
+  `server/today.ts` and is covered by tests that lock the rules rather than
+  the implementation. A quiet day collapses to a single line rather than
+  filling with reassurances.
+- **Tabs have a lifecycle** — previews replaced by the next open, kept by
+  double-click / the pin control / sending to split / starting an edit, plus
+  an overflow menu, close-others and middle-click close.
+- **Reader navigation** — a contents rail on long documents that tracks the
+  heading in view, remembered reading position (except from a search hit),
+  prev/next through the folder's siblings, and backlinks open by default
+  alongside a new "Links to" list of the document's own outbound references.
+- **Recently-opened trail** — press ⌘K with an empty query.
+- **Saving is ~12× cheaper** — indexing is incremental rather than re-reading
+  and re-hashing the whole workspace on every change.
+- **Repairs** — the top-bar memory dot now actually tracks state (it was
+  pinned green), the Memory verdict no longer counts amber as a breach,
+  machine-scratch folders stay out of search/activity/recents everywhere, the
+  space memory hero crops with a "read in full" rather than clipping
+  mid-sentence, and the app has a document outline and AA-contrast chrome.
+
+Tests went from 22 to 89, and `npm test` now passes on a clean clone.
 
 ## What exists so far
 
