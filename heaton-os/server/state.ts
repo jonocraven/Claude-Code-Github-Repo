@@ -2,9 +2,15 @@ import chokidar from "chokidar";
 import path from "node:path";
 import type MiniSearch from "minisearch";
 import { isIgnored, WORKSPACE_ROOT } from "./config.js";
-import { buildBacklinks, type BacklinkIndex } from "./backlinks.js";
-import { scanCorpus, type Corpus } from "./corpus.js";
-import { buildSearchIndex } from "./search.js";
+import {
+  buildBacklinks,
+  buildForwardIndex,
+  updateBacklinks,
+  type BacklinkIndex,
+  type ForwardIndex,
+} from "./backlinks.js";
+import { scanCorpus, updateCorpus, type Corpus } from "./corpus.js";
+import { buildSearchIndex, updateSearchIndex } from "./search.js";
 import { buildSemanticIndex } from "./semantic.js";
 
 /**
@@ -17,6 +23,9 @@ interface AppState {
   corpus: Corpus;
   search: ReturnType<typeof buildSearchIndex>;
   backlinks: BacklinkIndex;
+  /** Not part of any API response — kept only so incremental updates (brief
+   * 04) can diff a changed document's outgoing refs without a full rescan. */
+  forward: ForwardIndex;
 }
 
 let state: AppState | null = null;
@@ -42,13 +51,52 @@ function emitChange(paths: string[]): void {
   for (const listener of listeners) listener(paths);
 }
 
+/** Full scan — used only on initial boot (brief 04 §5: unchanged behaviour). */
 async function rebuild(): Promise<void> {
   const corpus = await scanCorpus(WORKSPACE_ROOT);
   state = {
     corpus,
     search: buildSearchIndex(corpus),
     backlinks: buildBacklinks(corpus),
+    forward: buildForwardIndex(corpus),
   };
+}
+
+/**
+ * Incremental update (brief 04): re-stat/re-read only the paths the watcher
+ * collected, patch the search index in place, and diff backlinks via the
+ * forward map rather than re-walking and re-parsing the whole workspace.
+ *
+ * The forward-map diff is only valid while the set of files is unchanged.
+ * A reference resolves against `corpus.files`, so creating or deleting *any*
+ * file can change how an unrelated, unchanged document's references resolve —
+ * a ref that dangled may now resolve, and vice versa. Those documents are not
+ * in `changedPaths`, so a diff keyed on changed paths alone silently drifts
+ * from what a full rebuild would produce (verified: it does, within a couple
+ * of create/delete cycles). Content edits keep the fast path; a membership
+ * change falls back to rebuilding the graph, which is the cheap half anyway —
+ * it re-parses nothing, since the corpus is already in memory.
+ */
+async function incrementalUpdate(changedPaths: readonly string[]): Promise<void> {
+  const current = getState();
+  // Per-path membership, not `files.size` — a rename removes one and adds
+  // another, leaving the count identical while the basis has changed.
+  const existedBefore = changedPaths.map((p) => current.corpus.files.has(p));
+  await updateCorpus(current.corpus, WORKSPACE_ROOT, changedPaths);
+  updateSearchIndex(current.search, current.corpus, changedPaths);
+  const membershipHeld = changedPaths.every(
+    (p, i) => current.corpus.files.has(p) === existedBefore[i]
+  );
+
+  if (membershipHeld) {
+    updateBacklinks(current.backlinks, current.forward, current.corpus, changedPaths);
+  } else {
+    state = {
+      ...current,
+      backlinks: buildBacklinks(current.corpus),
+      forward: buildForwardIndex(current.corpus),
+    };
+  }
 }
 
 export async function initState(): Promise<{ files: number; docs: number }> {
@@ -69,13 +117,14 @@ export async function initState(): Promise<{ files: number; docs: number }> {
     if (changed) {
       pending.add(path.relative(WORKSPACE_ROOT, changed).split(path.sep).join("/"));
     }
-    // Debounced full rebuild — ~275 md files, cheap; Drive sync storms of
-    // events collapse into one pass, then a single broadcast.
+    // Debounced incremental update — Drive sync storms of events collapse
+    // into one pass keyed on the paths that actually moved, then a single
+    // broadcast.
     if (rebuildTimer) clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(() => {
       const paths = [...pending];
       pending.clear();
-      void rebuild().then(() => {
+      void incrementalUpdate(paths).then(() => {
         emitChange(paths);
         void buildSemanticIndex(getState().corpus);
       });

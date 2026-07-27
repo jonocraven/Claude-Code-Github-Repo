@@ -1,5 +1,5 @@
 import MiniSearch from "minisearch";
-import type { Corpus } from "./corpus.js";
+import type { Corpus, CorpusDoc } from "./corpus.js";
 import { spaceOf } from "./paths.js";
 
 export interface KeywordHit {
@@ -41,6 +41,39 @@ export function buildSearchIndex(corpus: Corpus): MiniSearch<IndexedDoc> {
     }))
   );
   return index;
+}
+
+function toIndexedDoc(d: CorpusDoc): IndexedDoc {
+  return {
+    id: d.path,
+    title: d.title,
+    headings: d.headings,
+    body: d.body,
+    path: d.path,
+    space: spaceOf(d.path),
+  };
+}
+
+/**
+ * Incremental counterpart to `buildSearchIndex` (brief 04): apply only the
+ * changed paths to the existing index via MiniSearch's discard/replace/add,
+ * rather than reconstructing it from the whole corpus.
+ */
+export function updateSearchIndex(
+  index: MiniSearch<IndexedDoc>,
+  corpus: Corpus,
+  changedPaths: readonly string[]
+): void {
+  for (const p of changedPaths) {
+    const doc = corpus.docs.get(p);
+    const wasIndexed = index.has(p);
+    if (doc) {
+      if (wasIndexed) index.replace(toIndexedDoc(doc));
+      else index.add(toIndexedDoc(doc));
+    } else if (wasIndexed) {
+      index.discard(p);
+    }
+  }
 }
 
 function escapeHtml(s: string): string {

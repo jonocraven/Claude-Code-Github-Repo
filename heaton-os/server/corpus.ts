@@ -65,3 +65,52 @@ export async function scanCorpus(root: string): Promise<Corpus> {
   await walk(root);
   return { files, docs };
 }
+
+/**
+ * Incremental counterpart to `scanCorpus` (brief 04): re-stat and re-read only
+ * the paths the watcher says changed, and leave every other entry untouched
+ * by identity — `corpus` is mutated in place so callers keep the same
+ * `files`/`docs` references.
+ */
+export async function updateCorpus(
+  corpus: Corpus,
+  root: string,
+  changedPaths: readonly string[]
+): Promise<void> {
+  for (const rel of changedPaths) {
+    if (rel.split("/").some((seg) => isIgnored(seg))) continue;
+    const abs = path.join(root, ...rel.split("/"));
+
+    let stat: Awaited<ReturnType<typeof fs.stat>> | null;
+    try {
+      stat = await fs.stat(abs);
+    } catch {
+      stat = null;
+    }
+
+    if (!stat || stat.isDirectory()) {
+      // Gone (deleted, or a directory event chokidar reported) — drop it.
+      corpus.files.delete(rel);
+      corpus.docs.delete(rel);
+      continue;
+    }
+
+    corpus.files.add(rel);
+
+    if (/\.md$/i.test(rel)) {
+      const body = await fs.readFile(abs, "utf8");
+      const name = path.posix.basename(rel);
+      corpus.docs.set(rel, {
+        path: rel,
+        title: firstH1(body, name.replace(/\.md$/i, "")),
+        headings: headingsOf(body),
+        body,
+        hash: crypto.createHash("sha256").update(body).digest("hex"),
+        modified: stat.mtime.toISOString(),
+      });
+    } else {
+      // Was markdown, changed extension via rename — drop the stale doc.
+      corpus.docs.delete(rel);
+    }
+  }
+}
