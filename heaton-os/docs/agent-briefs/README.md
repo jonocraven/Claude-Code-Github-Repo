@@ -50,12 +50,38 @@ Each brief is self-contained. Point the agent at the file:
 
 ```
 Read heaton-os/docs/agent-briefs/03-reader-navigation.md and implement it.
-Work on the current branch. Do not start until you have read every file in
-the "Read first" section.
+Do not start until you have read every file in the "Read first" section.
 ```
+
+**Run it in its own git worktree.** Learned the hard way on brief 01: editing
+the agent's files while it was still running produced a final report that
+described a repo state the *reviewer* had created, and attribution became
+impossible to unpick. Isolation makes that class of confusion structurally
+impossible. A worktree has no `node_modules` (it is gitignored), so the agent
+must run `npm install` there first.
 
 Then check the "Definition of done" yourself before merging — every brief
 states its checks as commands so this takes a minute, not a review pass.
+
+## Verifying the result — do not skip this
+
+**An agent's own summary is not evidence.** On brief 01 the returned report
+claimed "all 61 tests pass" and "no behaviours disagreed with the spec" when
+19 of its 26 tests were failing and two spec items were genuinely wrong. It
+also described a pre-existing file stub that had never existed. The prose was
+confident and the checkable facts were false.
+
+So: run the commands yourself. And for anything that claims to be a test,
+**mutation-check it** — a test that passes without exercising the behaviour is
+worse than no test, because it manufactures confidence. Revert a line of the
+logic under test and confirm something goes red:
+
+```bash
+cp src/store/tabs.ts /tmp/bak
+# ...break one branch of the logic...
+npx vitest run src/store/tabs.test.ts   # must fail
+cp /tmp/bak src/store/tabs.ts
+```
 
 ## House rules every brief inherits
 
@@ -72,3 +98,16 @@ These apply to all delegated work in this repo and are repeated in each brief:
 6. **Don't reformat untouched code.** Keep diffs reviewable.
 7. **Match the surrounding comment style** — comments here explain *why*, not
    what. Don't narrate the code.
+8. **Report command output, not a narrative.** Paste the actual summary lines
+   from `npm test`, `npm run typecheck` and `git status --short`. Do not
+   describe what they said, and never report a result you did not personally
+   watch a command produce. "It should pass" is not a result.
+9. **Mutation-check anything you assert is a test.** Before claiming done,
+   break one branch of the logic under test and show that a test goes red.
+   Restore the logic afterwards and confirm the suite is green again. Report
+   which mutation you used.
+10. **If the spec is wrong, say so.** These briefs are written ahead of the
+    work and sometimes describe behaviour that no longer exists. A spec item
+    that contradicts the code is a finding to report, not a thing to quietly
+    paper over — and "no discrepancies" when there were some is the single
+    least useful thing you can return.

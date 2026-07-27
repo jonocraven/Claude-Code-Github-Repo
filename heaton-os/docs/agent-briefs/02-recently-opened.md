@@ -70,6 +70,15 @@ persistence round-trip, corrupt-payload fallback, and the age-wording helper at
 each boundary. Use the `localStorage` stub pattern described in
 [brief 01](01-tabs-store-tests.md).
 
+**Read brief 01's "trap that broke the first attempt" section before writing a
+line of this.** It applies here unchanged: zustand's `getState()` returns a
+snapshot, so re-read it after every action rather than asserting on a captured
+`state.entries`. That single mistake failed 19 of 26 tests last time.
+
+Then **mutation-check** your tests, as house rule 9 requires: break the
+move-to-front branch and the 20-entry cap in turn, confirm a test goes red for
+each, restore, and confirm green. Report which mutations you used.
+
 ## Out of scope
 
 - No server changes. This is client-only.

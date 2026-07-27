@@ -47,6 +47,28 @@ Then inside each test: `const { useTabs } = await import("./tabs.js");` and
 drive it with `useTabs.getState()`. Seed persisted state by writing to
 `localStorage` under the key `heaton-os.tabs.v1` *before* the import.
 
+### The trap that broke the first attempt at this brief
+
+`getState()` returns a **snapshot**. Action references on it survive a `set()`,
+but data references do not — so this silently asserts against history:
+
+```ts
+const state = useTabs.getState();
+state.openTab({ appId: "reader" });   // fine: actions are stable
+expect(state.tabs).toHaveLength(1);   // WRONG: `state.tabs` predates the action
+```
+
+Re-read the state after every action that changes it:
+
+```ts
+expect(useTabs.getState().tabs).toHaveLength(1);   // correct
+```
+
+The first run of this brief made that mistake 81 times and 19 of 26 tests
+failed. Calling actions off a captured `state` is fine; reading `tabs`,
+`activeLeft`, `activeRight`, `split`, `activePane` or `sidebarCollapsed` off
+one is not.
+
 ## Behaviours to cover
 
 Each bullet is one `it(...)`. The expected behaviour is authoritative — if the
@@ -71,8 +93,11 @@ code disagrees, the code is wrong (see "found a bug" above).
 **Identity**
 9. `openTab` twice with the same `appId` + `instanceKey` yields one tab, and
    activates the existing one.
-10. Different `instanceKey` values for the same `appId` yield separate tabs
-    (this is how two documents in the Reader coexist).
+10. Different `instanceKey` values for the same `appId` are separate
+    identities — prove it with `transient: false` on both, because two
+    *previews* in one pane correctly collapse to a single tab. Assert that
+    collapsing behaviour as its own test rather than treating it as a bug.
+    (The original wording of this item predated previews and was wrong.)
 11. `appId: "search"` never creates a tab.
 
 **Closing**
@@ -92,7 +117,11 @@ code disagrees, the code is wrong (see "found a bug" above).
 
 **Persistence & migration**
 19. State written by one instance is restored on re-import (tabs, activeLeft,
-    split, sidebarCollapsed).
+    split, sidebarCollapsed). Build the split with `sendToRight` — that is
+    what sets `split`. Opening straight into the right pane sets `activeRight`
+    without `split`, a state the UI cannot reach, so don't assert against it.
+    Note the re-imported store is a *different* binding: assert on the new one,
+    not the one you captured before `vi.resetModules()`.
 20. **Migration:** persisted tabs with no `transient` field restore as
     `transient: false`. Seed a payload whose tab objects omit the key entirely.
 21. `activeRight` is dropped on load when `split` was false.
