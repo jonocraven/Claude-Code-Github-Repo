@@ -15,6 +15,7 @@ import { memoryHealth } from "./memory.js";
 import { recentActivity } from "./recent.js";
 import { scheduledMonth } from "./scheduled.js";
 import { completeTask, plate, sectionTasks } from "./todoist.js";
+import { today } from "./today.js";
 
 // Model downloads etc. respect HTTPS_PROXY when one is configured; a no-op
 // otherwise. Fetches happen only at first semantic-index build.
@@ -243,6 +244,12 @@ app.get<{ Querystring: { year?: string; month?: string } }>(
     const month = Number(req.query.month) || now.getMonth() + 1;
     return { year, month, events: await scheduledMonth(year, month) };
   }
+);
+
+// The cross-space triage surface — composes tasks, cadences, memory and
+// file activity into one ranked snapshot (see server/today.ts).
+app.get<{ Querystring: { since?: string } }>("/api/today", async (req) =>
+  today(req.query.since ?? null)
 );
 
 app.get("/api/todoist/plate", async () => plate());

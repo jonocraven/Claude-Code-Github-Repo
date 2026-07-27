@@ -19,10 +19,12 @@ export function Desktop({
 
   // First run (no restored tabs): open Welcome alongside Files.
   useEffect(() => {
-    const { tabs, openApp, openTab } = useTabs.getState();
+    const { tabs, openTab } = useTabs.getState();
     if (tabs.length === 0) {
-      openApp("files");
-      openTab({ appId: "welcome", title: "Welcome" });
+      // Land on Today — the question the app exists to answer. Kept, not
+      // preview, so the first space you open doesn't evict it.
+      openTab({ appId: "welcome", title: "Welcome", transient: false });
+      openTab({ appId: "today", transient: false });
     }
   }, []);
 
@@ -61,11 +63,12 @@ export function Desktop({
 
   return (
     <div className="shell">
+      <h1 className="sr-only">Heaton OS — workspace</h1>
       <Sidebar onSearch={() => setPaletteOpen(true)} />
-      <div className="main paper-grain">
+      <main className="main paper-grain">
         <TopBar onSearch={() => setPaletteOpen(true)} />
         <ContentArea tree={tree} error={error} />
-      </div>
+      </main>
       {paletteOpen && <SearchPalette onClose={() => setPaletteOpen(false)} />}
       {keymapOpen && <KeymapOverlay onClose={() => setKeymapOpen(false)} />}
     </div>

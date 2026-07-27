@@ -64,7 +64,7 @@ export function ActivityWindow() {
         </div>
       </header>
 
-      {!activity && <p className="tree-state">Reading recent changes…</p>}
+      {!activity && <p className="tree-state" role="status">Reading recent changes…</p>}
       {activity && activity.length === 0 && (
         <p className="tree-state">No changes in the last {days} days.</p>
       )}

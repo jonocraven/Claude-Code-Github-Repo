@@ -6,6 +6,10 @@ import { useTabs } from "../store/tabs";
 // Search is the palette, handled specially).
 const SYSTEM_NAV = ["files", "tasks", "calendar", "memory", "activity"];
 
+// Today is the landing surface, so it sits above the spaces rather than
+// among the system tools it summarises.
+const TODAY_ID = "today";
+
 export function Sidebar({ onSearch }: { onSearch: () => void }) {
   const tabs = useTabs((s) => s.tabs);
   const activeLeft = useTabs((s) => s.activeLeft);
@@ -23,6 +27,7 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
 
   const spaces = APPS.filter((a) => a.kind === "space");
   const system = SYSTEM_NAV.map((id) => APPS.find((a) => a.id === id)!).filter(Boolean);
+  const todayApp = APPS.find((a) => a.id === TODAY_ID)!;
 
   const navItem = (app: (typeof APPS)[number]) => (
     <li key={app.id}>
@@ -61,6 +66,8 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
         <span className="nav-label">Search</span>
         <span className="nav-kbd" aria-hidden="true">⌘K</span>
       </button>
+
+      <ul className="nav-list nav-list-today">{navItem(todayApp)}</ul>
 
       <p className="sidebar-heading">Spaces</p>
       <ul className="nav-list">{spaces.map(navItem)}</ul>

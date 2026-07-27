@@ -32,6 +32,12 @@ export interface FrontMatterField {
   html: string;
 }
 
+export interface Heading {
+  id: string;
+  text: string;
+  depth: number;
+}
+
 export interface FileResponse {
   kind: "markdown" | "csv" | "image" | "pdf" | "html" | "other";
   path: string;
@@ -41,6 +47,7 @@ export interface FileResponse {
   modified: string;
   title?: string;
   frontmatter?: FrontMatterField[];
+  headings?: Heading[];
   html?: string;
   text?: string;
   source?: string; // raw markdown, for the editor
@@ -222,6 +229,35 @@ export function completeTask(id: string): Promise<Response> {
   return fetch(`/api/todoist/complete?id=${encodeURIComponent(id)}`, {
     method: "POST",
   });
+}
+
+// --- Today: the cross-space triage surface -------------------------------
+
+export interface ChangedGroup {
+  id: string | null;
+  label: string;
+  files: ActivityFile[];
+  total: number;
+}
+
+export interface TodayResponse {
+  now: string;
+  since: string;
+  sinceWidened: boolean;
+  tasksConfigured: boolean;
+  overdue: Task[];
+  dueToday: Task[];
+  upcoming: Task[];
+  waiting: Task[];
+  runsToday: ScheduledEvent[];
+  memoryBreaches: MemoryGauge[];
+  changed: ChangedGroup[];
+  changedTotal: number;
+}
+
+export function fetchToday(since: string | null): Promise<TodayResponse> {
+  const params = since ? `?since=${encodeURIComponent(since)}` : "";
+  return getJson(`/api/today${params}`);
 }
 
 /** DD-MM-YYYY — UK conventions throughout (brief §7). */

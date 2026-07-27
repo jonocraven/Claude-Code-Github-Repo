@@ -3,6 +3,7 @@ import { fetchSearch, type SearchResponse } from "../api";
 import { APPS, type AppDef } from "../apps";
 import { AppIcon } from "../icons";
 import { openFile, useTabs } from "../store/tabs";
+import { useRecent, formatAge } from "../store/recent";
 
 const SPACES = APPS.filter((a) => a.kind === "space");
 
@@ -25,6 +26,7 @@ interface Entry {
 
 export function SearchPalette({ onClose }: { onClose: () => void }) {
   const openApp = useTabs((s) => s.openApp);
+  const recent = useRecent((s) => s.entries);
   const [query, setQuery] = useState("");
   const [space, setSpace] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResponse | null>(null);
@@ -62,11 +64,27 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
         onClose();
       },
     }));
+
+    // Add recent entries when query is empty
+    if (!query.trim() && recent.length > 0) {
+      const recentTopEight = recent.slice(0, 8);
+      for (const entry of recentTopEight) {
+        list.push({
+          key: `recent:${entry.path}`,
+          run: () => {
+            openFile(entry.path);
+            onClose();
+          },
+        });
+      }
+    }
+
     for (const hit of results?.keyword ?? []) {
       list.push({
         key: `kw:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          // A search hit lands at the top, not a remembered position (brief 03 §3).
+          openFile(hit.path, { restore: false });
           onClose();
         },
       });
@@ -75,13 +93,13 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
       list.push({
         key: `sem:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          openFile(hit.path, { restore: false });
           onClose();
         },
       });
     }
     return list;
-  }, [appHits, results, openApp, onClose]);
+  }, [appHits, query, recent, results, openApp, onClose]);
 
   useEffect(() => setActive(0), [query, space, results?.keyword.length]);
 
@@ -176,6 +194,30 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
             </section>
           )}
 
+          {!query.trim() && recent.length > 0 && (
+            <section>
+              <h3 className="palette-section">Recent</h3>
+              {recent.slice(0, 8).map((entry) => {
+                const rc = rowClass(`recent:${entry.path}`);
+                return (
+                  <button
+                    type="button"
+                    {...rc}
+                    onClick={() => {
+                      openFile(entry.path);
+                      onClose();
+                    }}
+                  >
+                    <span className="palette-doc">
+                      <span className="palette-title">{entry.title}</span>
+                    </span>
+                    <span className="palette-hint">{formatAge(entry.at)}</span>
+                  </button>
+                );
+              })}
+            </section>
+          )}
+
           {results && results.keyword.length > 0 && (
             <section>
               <h3 className="palette-section">Documents</h3>
@@ -186,7 +228,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                     type="button"
                     {...rc}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >
@@ -216,7 +258,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                     type="button"
                     {...rc}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >

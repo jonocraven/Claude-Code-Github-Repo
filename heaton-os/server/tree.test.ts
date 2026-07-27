@@ -23,9 +23,6 @@ describe("buildTree over the fixture workspace", () => {
     expect(paths).toContain(
       "Design System/The Family Table Co — Design System/notes.md"
     );
-    expect(paths).toContain(
-      "Spaces/Job-Search/Resources/digests/State (machine memory — ignore)/state.md"
-    );
     // Those paths must survive an encodeURIComponent round-trip per segment.
     for (const p of paths) {
       const roundTripped = p
@@ -42,6 +39,16 @@ describe("buildTree over the fixture workspace", () => {
     for (const banned of [".DS_Store", ".tmp.driveupload", ".obsidian"]) {
       expect(names).not.toContain(banned);
     }
+  });
+
+  it("hides machine-scratch folders named '… ignore)' and everything under them", async () => {
+    const tree = await buildTree(FIXTURE);
+    const paths = flatten(tree).map((n) => n.path);
+    expect(paths).not.toContain(
+      "Spaces/Job-Search/Resources/digests/State (machine memory — ignore)"
+    );
+    // The contents must go too, not just the folder node.
+    expect(paths.some((p) => p.endsWith("/state.md"))).toBe(false);
   });
 
   it("reports per-node file counts and latest-modified dates", async () => {

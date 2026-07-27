@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { IGNORE_NAMES, WORKSPACE_ROOT } from "./config.js";
+import { isIgnored, WORKSPACE_ROOT } from "./config.js";
 
 /**
  * Recent-activity feed (brief §4.7). Files changed within the window,
@@ -38,7 +38,7 @@ async function walk(root: string, dir: string, out: ActivityFile[]): Promise<voi
   const entries = await fs.readdir(dir, { withFileTypes: true });
   await Promise.all(
     entries.map(async (entry) => {
-      if (IGNORE_NAMES.has(entry.name)) return;
+      if (isIgnored(entry.name)) return;
       const abs = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         await walk(root, abs, out);

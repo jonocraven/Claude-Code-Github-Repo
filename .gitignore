@@ -1,0 +1,8 @@
+# Agent worktrees and local tooling scratch. These are transient checkouts
+# created when delegating a brief (see heaton-os/docs/agent-briefs/README.md)
+# and must never be committed — doing so would capture a running agent's
+# working tree mid-flight.
+.claude/worktrees/
+
+.DS_Store
+*.log

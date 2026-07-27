@@ -90,6 +90,15 @@ const ICONS: Record<string, (p: IconProps) => React.JSX.Element> = {
   ),
 
   // --- System apps ---
+  today: (p) => (
+    <Svg {...p}>
+      {/* sun coming up over a horizon — the start of the working day */}
+      <path d="M2.9 17.4h18.2" />
+      <path d="M6.6 17.4a5.4 5.4 0 0 1 10.8 0" />
+      <path d="M12 4.3v2.1M4.7 7.5l1.5 1.5M19.3 7.5l-1.5 1.5" />
+      <path d="M2.9 20.6h4.4M10.2 20.6h11" />
+    </Svg>
+  ),
   files: (p) => (
     <Svg {...p}>
       <path d="M3.6 6.4h5.6l2 2.4h9.2c.5 0 .8.4.8.9v9.1c0 .5-.3.8-.8.8H3.6c-.5 0-.8-.3-.8-.8V7.2c0-.5.3-.8.8-.8Z" />
