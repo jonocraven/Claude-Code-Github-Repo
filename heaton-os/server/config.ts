@@ -54,3 +54,16 @@ export const IGNORE_NAMES = new Set([
   "__pycache__",
   "node_modules",
 ]);
+
+/**
+ * Workspace convention: a folder whose name ends in "ignore)" — as in
+ * "State (machine memory — ignore)" — is machine scratch space and is hidden
+ * everywhere (tree, search, recents, activity, watcher). This lets Jono
+ * retire a folder from the UI by renaming it, with no code change.
+ */
+const IGNORE_SUFFIX = /ignore\)\s*$/i;
+
+/** The single ignore test — every walker and the watcher must use this. */
+export function isIgnored(name: string): boolean {
+  return IGNORE_NAMES.has(name) || IGNORE_SUFFIX.test(name);
+}

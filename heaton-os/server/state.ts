@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
 import path from "node:path";
 import type MiniSearch from "minisearch";
-import { IGNORE_NAMES, WORKSPACE_ROOT } from "./config.js";
+import { isIgnored, WORKSPACE_ROOT } from "./config.js";
 import { buildBacklinks, type BacklinkIndex } from "./backlinks.js";
 import { scanCorpus, type Corpus } from "./corpus.js";
 import { buildSearchIndex } from "./search.js";
@@ -59,7 +59,7 @@ export async function initState(): Promise<{ files: number; docs: number }> {
   void buildSemanticIndex(corpus);
 
   const watcher = chokidar.watch(WORKSPACE_ROOT, {
-    ignored: (p) => p.split(path.sep).some((seg) => IGNORE_NAMES.has(seg)),
+    ignored: (p) => p.split(path.sep).some((seg) => isIgnored(seg)),
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 400, pollInterval: 100 },
   });

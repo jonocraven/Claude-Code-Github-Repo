@@ -24,6 +24,12 @@ export interface Tab {
   title: string;
   pane: Pane;
   payload: TabPayload;
+  /**
+   * A transient tab is a preview: at most one per pane, and the next preview
+   * replaces it. Browsing spaces therefore costs one tab, not eight. Pin it
+   * (double-click, the pin control, or by starting an edit) to keep it.
+   */
+  transient: boolean;
 }
 
 interface OpenOpts {
@@ -32,6 +38,8 @@ interface OpenOpts {
   title?: string;
   payload?: TabPayload;
   pane?: Pane;
+  /** Default true — opens as a preview. Pass false to open a kept tab. */
+  transient?: boolean;
 }
 
 interface TabState {
@@ -47,6 +55,8 @@ interface TabState {
   openApp: (appId: string) => void;
   reveal: (path: string) => void;
   closeTab: (id: string) => void;
+  closeOthers: (id: string) => void;
+  pinTab: (id: string) => void;
   activate: (id: string) => void;
   setActivePane: (pane: Pane) => void;
   sendToRight: (id: string) => void;
@@ -74,7 +84,9 @@ function load(): Partial<TabState> {
     const p = JSON.parse(raw) as Persisted;
     if (!Array.isArray(p.tabs)) return {};
     return {
-      tabs: p.tabs,
+      // Sessions saved before previews existed have no `transient` field.
+      // Treat those tabs as kept — restoring a workspace must never drop one.
+      tabs: p.tabs.map((t) => ({ ...t, transient: t.transient ?? false })),
       activeLeft: p.activeLeft ?? null,
       activeRight: p.split ? (p.activeRight ?? null) : null,
       split: !!p.split,
@@ -137,7 +149,7 @@ export const useTabs = create<TabState>((set, get) => {
     revealPath: null,
     sidebarCollapsed: persisted.sidebarCollapsed ?? false,
 
-    openTab: ({ appId, instanceKey = "", title, payload = {}, pane }) => {
+    openTab: ({ appId, instanceKey = "", title, payload = {}, pane, transient = true }) => {
       if (appId === "search") return; // search is the palette, never a tab
       const { tabs, activePane, split } = get();
 
@@ -145,6 +157,8 @@ export const useTabs = create<TabState>((set, get) => {
         (t) => t.appId === appId && t.instanceKey === instanceKey
       );
       if (existing) {
+        // Re-opening a kept tab must never demote it back to a preview.
+        if (!transient && existing.transient) get().pinTab(existing.id);
         get().activate(existing.id);
         return;
       }
@@ -158,9 +172,14 @@ export const useTabs = create<TabState>((set, get) => {
         title: title ?? getApp(appId).name,
         pane: target,
         payload,
+        transient,
       };
+      // A new preview takes the place of the pane's outgoing preview.
+      const next = transient
+        ? tabs.filter((t) => !(t.pane === target && t.transient))
+        : tabs;
       commit({
-        tabs: [...tabs, tab],
+        tabs: [...next, tab],
         ...(target === "left"
           ? { activeLeft: id, activePane: "left" as Pane }
           : { activeRight: id, activePane: "right" as Pane }),
@@ -184,6 +203,32 @@ export const useTabs = create<TabState>((set, get) => {
           ? { activeLeft: id, activePane: "left" }
           : { activeRight: id, activePane: "right" }
       );
+    },
+
+    pinTab: (id) => {
+      const { tabs } = get();
+      if (!tabs.some((t) => t.id === id && t.transient)) return;
+      commit({
+        tabs: tabs.map((t) => (t.id === id ? { ...t, transient: false } : t)),
+      });
+    },
+
+    /** Close every other tab in the same pane; the survivor is kept, not preview. */
+    closeOthers: (id) => {
+      const { tabs } = get();
+      const tab = tabs.find((t) => t.id === id);
+      if (!tab) return;
+      const remaining = tabs.filter(
+        (t) => t.pane !== tab.pane || t.id === id
+      );
+      const next: Partial<TabState> = {
+        tabs: remaining.map((t) =>
+          t.id === id ? { ...t, transient: false } : t
+        ),
+      };
+      if (tab.pane === "left") next.activeLeft = id;
+      else next.activeRight = id;
+      commit(next);
     },
 
     setActivePane: (pane) => {
@@ -231,7 +276,11 @@ export const useTabs = create<TabState>((set, get) => {
       if (!tab) return;
       // Need at least one tab to remain on the left.
       if (tab.pane === "left" && leftCount < 2) return;
-      const moved = tabs.map((t) => (t.id === id ? { ...t, pane: "right" as Pane } : t));
+      // Setting up a side-by-side comparison is a deliberate keep, so the
+      // moved tab is pinned — a later preview must not evict it.
+      const moved = tabs.map((t) =>
+        t.id === id ? { ...t, pane: "right" as Pane, transient: false } : t
+      );
       const next: Partial<TabState> = {
         tabs: moved,
         split: true,

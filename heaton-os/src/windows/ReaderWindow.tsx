@@ -20,6 +20,7 @@ export function ReaderWindow({
   path: string | undefined;
 }) {
   const setTitle = useTabs((s) => s.setTitle);
+  const pinTab = useTabs((s) => s.pinTab);
   const [doc, setDoc] = useState<FileResponse | null>(null);
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
   const [showBacklinks, setShowBacklinks] = useState(false);
@@ -99,6 +100,8 @@ export function ReaderWindow({
     setDirty(false);
     setSaveState({ kind: "idle" });
     setEditing(true);
+    // Editing is a commitment — a preview tab must not be evicted mid-edit.
+    pinTab(windowId);
   };
 
   const cancelEditing = () => {

@@ -70,7 +70,7 @@ function CsvViewer({ path }: { path: string }) {
     return copy;
   }, [rows, sortCol, asc]);
 
-  if (text === null) return <div className="tree-state"><p>Loading…</p></div>;
+  if (text === null) return <div className="tree-state" role="status"><p>Loading…</p></div>;
 
   return (
     <div className="viewer-csv">
@@ -116,7 +116,7 @@ function TextViewer({ path }: { path: string }) {
       .then(setText)
       .catch(() => setText("Couldn't read the file."));
   }, [path]);
-  if (text === null) return <div className="tree-state"><p>Loading…</p></div>;
+  if (text === null) return <div className="tree-state" role="status"><p>Loading…</p></div>;
   return <pre className="viewer-text">{text}</pre>;
 }
 

@@ -56,19 +56,26 @@ export function MemoryWindow() {
       </div>
     );
   }
-  if (!health) return <div className="tree-state">Measuring memory files…</div>;
+  if (!health) return <div className="tree-state" role="status">Measuring memory files…</div>;
 
-  const breaches = health.gauges.filter((g) => g.status !== "green").length;
+  // Amber means approaching, red means breached — never roll them together.
+  const over = health.gauges.filter((g) => g.status === "red").length;
+  const near = health.gauges.filter((g) => g.status === "amber").length;
+  const verdict =
+    over === 0 && near === 0
+      ? "All within ceilings"
+      : [
+          over > 0 ? `${over} over ceiling` : null,
+          near > 0 ? `${near} approaching` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
 
   return (
     <div className="memory">
       <header className="memory-head">
         <span className={`memory-verdict memory-verdict-${health.worst}`}>
-          {health.worst === "green"
-            ? "All within ceilings"
-            : health.worst === "amber"
-              ? `${breaches} approaching ceiling`
-              : `${breaches} over ceiling`}
+          {verdict}
         </span>
         <span className="memory-sub">Amber at 85% · red at breach</span>
       </header>

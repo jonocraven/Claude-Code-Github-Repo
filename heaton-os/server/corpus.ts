@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
-import { IGNORE_NAMES } from "./config.js";
+import { isIgnored } from "./config.js";
 
 export interface CorpusDoc {
   path: string;
@@ -36,7 +36,7 @@ export async function scanCorpus(root: string): Promise<Corpus> {
     const entries = await fs.readdir(dir, { withFileTypes: true });
     await Promise.all(
       entries.map(async (entry) => {
-        if (IGNORE_NAMES.has(entry.name)) return;
+        if (isIgnored(entry.name)) return;
         const abs = path.join(dir, entry.name);
         if (entry.isDirectory()) {
           await walk(abs);

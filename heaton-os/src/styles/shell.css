@@ -849,9 +849,9 @@ a.ref-unresolved {
    ========================================================================== */
 
 /* --- Memory dot states (menu bar) --------------------------------------- */
-.memory-dot-green { background: var(--accent-wfdinner); }
-.memory-dot-amber { background: var(--accent-home); }
-.memory-dot-red { background: var(--accent-cookery-books); }
+.memory-dot-green { --dot-fill: var(--accent-wfdinner); }
+.memory-dot-amber { --dot-fill: var(--accent-home); }
+.memory-dot-red { --dot-fill: var(--accent-cookery-books); }
 
 /* --- Shared tabs -------------------------------------------------------- */
 .tabs {
@@ -1448,9 +1448,24 @@ a.ref-unresolved {
   border-bottom: 1px solid var(--ink-faint);
 }
 
+/* No nested scrollbar: the hero crops with a fade and an explicit
+   "read in full", so the space's most important document is never cut
+   off mid-sentence with no way to tell there was more. */
 .space-hero {
-  max-height: 320px;
-  overflow-y: auto;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.space-hero-content.is-cropped {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+}
+
+.space-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 /* Inside a dashboard panel the measure is the panel, not a reading column —
@@ -1462,9 +1477,6 @@ a.ref-unresolved {
   margin-inline: 0;
 }
 
-.space-hero-open {
-  margin-top: var(--space-3);
-}
 
 .space-empty {
   color: var(--ink-soft);
@@ -1838,7 +1850,8 @@ a.ref-unresolved {
   font-size: var(--text-small);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--ink-faint);
+  /* --ink-faint fell below 4.5:1 on the sidebar ground at this size. */
+  color: var(--ink-soft);
   padding: var(--space-3) var(--space-3) var(--space-1);
 }
 .is-collapsed .sidebar-heading {
@@ -1991,14 +2004,17 @@ a.ref-unresolved {
   margin-left: var(--space-2);
 }
 
-/* memory dot (shared with the Memory Monitor states below) */
+/* memory dot (shared with the Memory Monitor states above). The fill comes
+   from --dot-fill, set by the .memory-dot-* state classes — a plain
+   `background` here would win on source order and pin the dot to one colour
+   no matter what the state is. */
 .memory-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   border: var(--border);
   display: inline-block;
-  background: var(--accent-wfdinner);
+  background: var(--dot-fill, var(--ink-faint));
 }
 
 /* --- Content, panes, tab strip ------------------------------------------- */
@@ -2020,23 +2036,33 @@ a.ref-unresolved {
   border-right: var(--border);
 }
 
+/* The strip scrolls; the overflow button is pinned outside it so there is
+   always a way to reach a tab that has scrolled out of sight. */
+.tabstrip-row {
+  display: flex;
+  align-items: stretch;
+  height: var(--tabstrip-h);
+  min-width: 0;
+  background: var(--paper-deep);
+  border-bottom: var(--border);
+}
+
+.pane.is-active-pane .tabstrip-row {
+  box-shadow: inset 0 3px 0 var(--accent-job-search);
+}
+
 .tabstrip {
   display: flex;
   align-items: stretch;
   gap: 2px;
-  height: var(--tabstrip-h);
+  flex: 1;
+  min-width: 0;
   padding: var(--space-1) var(--space-2) 0;
-  background: var(--paper-deep);
-  border-bottom: var(--border);
   overflow-x: auto;
   scrollbar-width: none;
 }
 .tabstrip::-webkit-scrollbar {
   display: none;
-}
-
-.pane.is-active-pane .tabstrip {
-  box-shadow: inset 0 3px 0 var(--accent-job-search);
 }
 
 .doctab {
@@ -2049,12 +2075,20 @@ a.ref-unresolved {
   border-radius: var(--radius) var(--radius) 0 0;
   background: var(--paper-deep);
   max-width: 220px;
-  min-width: 0;
+  /* Keep a legible label rather than crushing every tab to one letter —
+     the strip scrolls (and the overflow menu lists them all) instead. */
+  min-width: 116px;
+  flex-shrink: 0;
   margin-bottom: -2px;
 }
 
 .doctab.is-active {
   background: var(--paper);
+}
+
+/* A preview reads as provisional: italic title, as in an editor. */
+.doctab.is-transient .doctab-title {
+  font-style: italic;
 }
 
 .doctab-open {
@@ -2079,7 +2113,8 @@ a.ref-unresolved {
 }
 
 .doctab-split,
-.doctab-close {
+.doctab-close,
+.doctab-pin {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
@@ -2090,16 +2125,137 @@ a.ref-unresolved {
 }
 .doctab:hover .doctab-split,
 .doctab:hover .doctab-close,
+.doctab:hover .doctab-pin,
+.doctab:focus-within .doctab-pin,
 .doctab.is-active .doctab-close {
   opacity: 1;
 }
-.doctab-split:hover {
+.doctab-split:hover,
+.doctab-pin:hover {
   background: var(--ink);
   color: var(--paper);
 }
 .doctab-close:hover {
   background: var(--accent-cookery-books);
   color: var(--paper);
+}
+
+/* --- Tab overflow menu --------------------------------------------------- */
+
+.tabmenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-left: 1px solid var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.tabmenu-btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  min-height: 26px;
+  white-space: nowrap;
+}
+.tabmenu-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.tabmenu-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 60;
+  min-width: 240px;
+  max-width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 1px;
+  padding: var(--space-1);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard);
+}
+
+.tabmenu-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tabmenu-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 32px;
+  color: var(--ink-soft);
+}
+.tabmenu-open:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+.tabmenu-open.is-active {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.tabmenu-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-small);
+}
+
+.tabmenu-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.tabmenu-close {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  color: var(--ink-faint);
+}
+.tabmenu-close:hover {
+  background: var(--accent-cookery-books);
+  color: var(--paper);
+}
+
+.tabmenu-action {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-align: left;
+  padding: var(--space-2);
+  min-height: 32px;
+  border-top: 1px solid var(--ink-faint);
+  margin-top: var(--space-1);
+  border-radius: var(--radius);
+}
+.tabmenu-action:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.tabmenu-action:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .pane-body {

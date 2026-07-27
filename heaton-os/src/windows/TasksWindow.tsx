@@ -89,7 +89,7 @@ export function TasksWindow() {
             />
           </>
         )}
-        {!error && !data && <p className="tree-state">Loading tasks…</p>}
+        {!error && !data && <p className="tree-state" role="status">Loading tasks…</p>}
       </div>
     </div>
   );
