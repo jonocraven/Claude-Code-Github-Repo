@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { getApp } from "../apps";
+import { record as recordRecent } from "./recent";
 
 /**
  * Tab + pane model for the dashboard shell. Open apps and documents are tabs,
@@ -336,6 +337,9 @@ export function openFile(path: string): void {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   const name = path.split("/").pop() ?? path;
   const open = useTabs.getState().openTab;
+  // Every file open funnels through here, so this is the one place the trail
+  // needs recording — never from the individual callers.
+  recordRecent(path, name);
   if (ext === "md") {
     open({ appId: "reader", instanceKey: path, title: name, payload: { path } });
     return;
