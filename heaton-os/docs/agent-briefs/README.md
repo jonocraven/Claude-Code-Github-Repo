@@ -60,6 +60,27 @@ impossible to unpick. Isolation makes that class of confusion structurally
 impossible. A worktree has no `node_modules` (it is gitignored), so the agent
 must run `npm install` there first.
 
+**Make the agent verify its base commit before it writes anything.** Learned on
+brief 02: the worktree was created from a commit predating the work the brief
+depended on, so the agent built against a codebase without the features it was
+extending — and then correctly reported test failures that were artefacts of
+that stale base. It only transplanted because the two files it touched happened
+not to have diverged. Briefs 03–05 touch files that *have* diverged, so a stale
+base there produces work that simply does not apply.
+
+Put this at the top of every agent prompt:
+
+```bash
+cd <worktree>
+git fetch origin
+git reset --hard origin/<the branch the work belongs on>
+git log --oneline -1          # confirm this matches the branch head
+ls heaton-os/docs/agent-briefs # if this is empty, you are on the wrong base — STOP
+```
+
+The last line is the cheap tell: the briefs live on the working branch, so if
+the agent cannot see them in its own checkout, its base is wrong.
+
 Then check the "Definition of done" yourself before merging — every brief
 states its checks as commands so this takes a minute, not a review pass.
 
@@ -111,3 +132,7 @@ These apply to all delegated work in this repo and are repeated in each brief:
     that contradicts the code is a finding to report, not a thing to quietly
     paper over — and "no discrepancies" when there were some is the single
     least useful thing you can return.
+11. **Verify your base commit before writing anything** (see "Running one").
+    If a test fails for a reason that looks unrelated to your work, check the
+    base *before* dismissing it as pre-existing — on brief 02 four such
+    failures were entirely an artefact of a stale checkout.
