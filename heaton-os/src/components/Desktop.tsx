@@ -21,10 +21,10 @@ export function Desktop({
   useEffect(() => {
     const { tabs, openTab } = useTabs.getState();
     if (tabs.length === 0) {
-      // The starting pair is kept, not preview — otherwise the first space
-      // you open would immediately evict them.
-      openTab({ appId: "files", transient: false });
+      // Land on Today — the question the app exists to answer. Kept, not
+      // preview, so the first space you open doesn't evict it.
       openTab({ appId: "welcome", title: "Welcome", transient: false });
+      openTab({ appId: "today", transient: false });
     }
   }, []);
 

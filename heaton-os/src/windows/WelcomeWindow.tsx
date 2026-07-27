@@ -4,11 +4,16 @@ export function WelcomeWindow() {
       <p className="welcome-kicker">Heaton OS — your workspace, live</p>
       <h3 className="welcome-heading">Good day, Jono.</h3>
       <p>
-        The rail on the left is your navigation: each <strong>space</strong>{" "}
-        opens on a dashboard — its memory, its Todoist tasks, recent files and
-        bespoke panels — and the system tools (Files, Tasks, Calendar, Memory,
-        Activity) sit below. Everything opens as a <strong>tab</strong> in this
-        area, so nothing overlaps.
+        Start at <strong>Today</strong>, top of the rail: what's late, what's
+        due, what's running, what's moved and what's parked with someone else —
+        across every space at once. Below it, each <strong>space</strong> opens
+        on its own dashboard (memory, tasks, recent files, bespoke panels), and
+        the system tools sit under those.
+      </p>
+      <p>
+        Everything opens as a <strong>tab</strong>, so nothing overlaps. Tabs
+        start as <em>previews</em> — browsing spaces costs one tab, not eight.
+        Double-click a tab (or start editing) to keep it.
       </p>
       <p>
         Open a document and it reads full-width here. To compare two, use the

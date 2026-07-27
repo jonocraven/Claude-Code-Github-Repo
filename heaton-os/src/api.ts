@@ -224,6 +224,35 @@ export function completeTask(id: string): Promise<Response> {
   });
 }
 
+// --- Today: the cross-space triage surface -------------------------------
+
+export interface ChangedGroup {
+  id: string | null;
+  label: string;
+  files: ActivityFile[];
+  total: number;
+}
+
+export interface TodayResponse {
+  now: string;
+  since: string;
+  sinceWidened: boolean;
+  tasksConfigured: boolean;
+  overdue: Task[];
+  dueToday: Task[];
+  upcoming: Task[];
+  waiting: Task[];
+  runsToday: ScheduledEvent[];
+  memoryBreaches: MemoryGauge[];
+  changed: ChangedGroup[];
+  changedTotal: number;
+}
+
+export function fetchToday(since: string | null): Promise<TodayResponse> {
+  const params = since ? `?since=${encodeURIComponent(since)}` : "";
+  return getJson(`/api/today${params}`);
+}
+
 /** DD-MM-YYYY — UK conventions throughout (brief §7). */
 export function formatDate(iso: string | null): string {
   if (!iso) return "—";

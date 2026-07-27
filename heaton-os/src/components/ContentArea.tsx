@@ -10,11 +10,14 @@ import { MemoryWindow } from "../windows/MemoryWindow";
 import { ReaderWindow } from "../windows/ReaderWindow";
 import { SpaceWindow } from "../windows/SpaceWindow";
 import { TasksWindow } from "../windows/TasksWindow";
+import { TodayWindow } from "../windows/TodayWindow";
 import { ViewerWindow } from "../windows/ViewerWindow";
 import { WelcomeWindow } from "../windows/WelcomeWindow";
 
 function renderTab(tab: Tab, tree: TreeDir | null, error: string | null) {
   switch (tab.appId) {
+    case "today":
+      return <TodayWindow />;
     case "welcome":
       return <WelcomeWindow />;
     case "files":

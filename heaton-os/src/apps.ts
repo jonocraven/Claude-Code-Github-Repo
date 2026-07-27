@@ -9,6 +9,9 @@ export interface AppDef {
 }
 
 export const APPS: AppDef[] = [
+  // The cross-space triage surface — sits above the spaces, not among them.
+  { id: "today", name: "Today", kind: "system", accentVar: "--accent-home" },
+
   // The eight space apps (brief §5)
   { id: "cookery-books", name: "Cookery Books", kind: "space", accentVar: "--accent-cookery-books" },
   { id: "wfdinner", name: "WFDinner", kind: "space", accentVar: "--accent-wfdinner" },

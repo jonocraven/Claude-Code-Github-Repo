@@ -2303,3 +2303,328 @@ a.ref-unresolved {
     flex-wrap: wrap;
   }
 }
+
+/* ==========================================================================
+   Today — the cross-space triage surface
+   ========================================================================== */
+
+.today {
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+  max-width: 78ch;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.today-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border);
+}
+
+.today-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+.today-greeting {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.today-since {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  max-width: 44ch;
+  text-align: right;
+}
+
+.today-clear {
+  font-family: var(--font-reading);
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  background: var(--paper-deep);
+}
+
+/* Sections are grouped by hairline rules, not boxes — the urgent one is the
+   only thing here that earns a full border, so the eye lands on it first. */
+.today-section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.today-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.today-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 999px;
+  padding: 0 var(--space-2);
+  min-width: 20px;
+  text-align: center;
+}
+
+.today-section-urgent {
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-4);
+  background: var(--paper);
+}
+.today-section-urgent .today-section-title {
+  color: var(--accent-cookery-books);
+  border-bottom-color: var(--accent-cookery-books);
+}
+.today-section-urgent .today-count {
+  background: var(--accent-cookery-books);
+}
+
+/* --- Task rows ----------------------------------------------------------- */
+
+.today-tasks {
+  list-style: none;
+  display: grid;
+  gap: 1px;
+}
+
+.today-task {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.today-task:hover {
+  background: var(--paper-deep);
+}
+
+.today-task-check {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.today-task-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.today-task-content {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.today-task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.today-task-space {
+  color: var(--ink-soft);
+}
+
+.today-tasks-quiet .today-task-content {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+/* --- Memory breaches ------------------------------------------------------ */
+
+.today-breaches,
+.today-changed,
+.today-runs {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.today-breach {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+.today-breach:hover {
+  background: var(--paper-deep);
+}
+
+.today-breach-name {
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.today-breach-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Scheduled runs ------------------------------------------------------- */
+
+.today-run {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+
+.today-run-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+/* --- Changed, grouped by space -------------------------------------------- */
+
+.today-changed-space {
+  padding: var(--space-2) 0;
+}
+
+.today-changed-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+}
+.today-changed-head:not(:disabled):hover {
+  background: var(--paper-deep);
+}
+.today-changed-head:disabled {
+  cursor: default;
+}
+
+.today-changed-label {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.today-changed-files {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  padding-left: var(--space-5);
+  margin-top: 2px;
+}
+
+.today-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 30px;
+}
+.today-file:hover {
+  background: var(--paper-deep);
+}
+
+.today-file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-small);
+}
+
+.today-changed-more {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  padding: var(--space-1) var(--space-2);
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.today-setup {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+.today-setup code {
+  background: var(--paper);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: 0 var(--space-1);
+}
+
+.today-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--ink-faint);
+}
+
+/* Today sits apart from the space list it summarises. */
+.nav-list-today {
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+@media (max-width: 720px) {
+  .today-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .today-since {
+    text-align: left;
+  }
+}

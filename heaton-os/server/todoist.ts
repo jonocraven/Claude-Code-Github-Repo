@@ -132,6 +132,11 @@ function byPriorityThenDue(a: Task, b: Task): number {
   return 0;
 }
 
+/** Every task, unfiltered — Today needs the delegated and blocked ones too. */
+export async function allTasks(): Promise<TasksResult> {
+  return loadTasks();
+}
+
 /** My Plate: Jono's own actionable tasks, most pressing first (brief §4.4). */
 export async function plate(): Promise<TasksResult> {
   const all = await loadTasks();
