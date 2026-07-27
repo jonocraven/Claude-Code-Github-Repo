@@ -32,6 +32,12 @@ export interface FrontMatterField {
   html: string;
 }
 
+export interface Heading {
+  id: string;
+  text: string;
+  depth: number;
+}
+
 export interface FileResponse {
   kind: "markdown" | "csv" | "image" | "pdf" | "html" | "other";
   path: string;
@@ -41,6 +47,7 @@ export interface FileResponse {
   modified: string;
   title?: string;
   frontmatter?: FrontMatterField[];
+  headings?: Heading[];
   html?: string;
   text?: string;
   source?: string; // raw markdown, for the editor

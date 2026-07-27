@@ -52,7 +52,9 @@ interface TabState {
   revealPath: string | null;
   sidebarCollapsed: boolean;
 
-  openTab: (opts: OpenOpts) => void;
+  /** Returns the id of the tab now active for these opts (existing or new) —
+   *  openFile needs it to key the search-open "don't restore" flag below. */
+  openTab: (opts: OpenOpts) => string;
   openApp: (appId: string) => void;
   reveal: (path: string) => void;
   closeTab: (id: string) => void;
@@ -66,6 +68,9 @@ interface TabState {
   setTitle: (id: string, title: string) => void;
   cycle: () => void;
   toggleSidebar: () => void;
+  /** Point an existing tab at a different document, in place (brief 03 §4:
+   *  next/prev reuses the tab id rather than opening a new one). */
+  retarget: (id: string, opts: { instanceKey: string; title: string; payload: TabPayload }) => void;
 }
 
 const STORE_KEY = "heaton-os.tabs.v1";
@@ -151,7 +156,7 @@ export const useTabs = create<TabState>((set, get) => {
     sidebarCollapsed: persisted.sidebarCollapsed ?? false,
 
     openTab: ({ appId, instanceKey = "", title, payload = {}, pane, transient = true }) => {
-      if (appId === "search") return; // search is the palette, never a tab
+      if (appId === "search") return ""; // search is the palette, never a tab
       const { tabs, activePane, split } = get();
 
       const existing = tabs.find(
@@ -161,7 +166,7 @@ export const useTabs = create<TabState>((set, get) => {
         // Re-opening a kept tab must never demote it back to a preview.
         if (!transient && existing.transient) get().pinTab(existing.id);
         get().activate(existing.id);
-        return;
+        return existing.id;
       }
 
       const target: Pane = pane ?? (activePane === "right" && split ? "right" : "left");
@@ -185,6 +190,7 @@ export const useTabs = create<TabState>((set, get) => {
           ? { activeLeft: id, activePane: "left" as Pane }
           : { activeRight: id, activePane: "right" as Pane }),
       });
+      return id;
     },
 
     openApp: (appId) => get().openTab({ appId }),
@@ -329,11 +335,33 @@ export const useTabs = create<TabState>((set, get) => {
     toggleSidebar: () => {
       commit({ sidebarCollapsed: !get().sidebarCollapsed });
     },
+
+    retarget: (id, { instanceKey, title, payload }) => {
+      commit({
+        tabs: get().tabs.map((t) =>
+          t.id === id ? { ...t, instanceKey, title, payload } : t
+        ),
+      });
+    },
   };
 });
 
+// Tab ids opened with `restore: false` (a search hit) — consumed once by the
+// Reader so a fresh document identity there knows to land at the top instead
+// of restoring a remembered scroll position (brief 03 §3). Keyed on tab id,
+// not path, so it can never bleed across panes or across a later plain open.
+const skipRestoreTabs = new Set<string>();
+
+/** Consume (and clear) the skip-restore flag for a tab, if one was set. */
+export function consumeSkipRestore(tabId: string): boolean {
+  const had = skipRestoreTabs.has(tabId);
+  skipRestoreTabs.delete(tabId);
+  return had;
+}
+
 /** Route a workspace file to the right tab type (markdown → Reader, else viewer). */
-export function openFile(path: string): void {
+export function openFile(path: string, opts?: { restore?: boolean }): void {
+  const restore = opts?.restore ?? true;
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   const name = path.split("/").pop() ?? path;
   const open = useTabs.getState().openTab;
@@ -341,7 +369,11 @@ export function openFile(path: string): void {
   // needs recording — never from the individual callers.
   recordRecent(path, name);
   if (ext === "md") {
-    open({ appId: "reader", instanceKey: path, title: name, payload: { path } });
+    const wasOpen = useTabs
+      .getState()
+      .tabs.some((t) => t.appId === "reader" && t.instanceKey === path);
+    const id = open({ appId: "reader", instanceKey: path, title: name, payload: { path } });
+    if (!restore && !wasOpen && id) skipRestoreTabs.add(id);
     return;
   }
   const kind =

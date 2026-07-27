@@ -83,7 +83,8 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
       list.push({
         key: `kw:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          // A search hit lands at the top, not a remembered position (brief 03 §3).
+          openFile(hit.path, { restore: false });
           onClose();
         },
       });
@@ -92,7 +93,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
       list.push({
         key: `sem:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          openFile(hit.path, { restore: false });
           onClose();
         },
       });
@@ -227,7 +228,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                     type="button"
                     {...rc}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >
@@ -257,7 +258,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                     type="button"
                     {...rc}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >

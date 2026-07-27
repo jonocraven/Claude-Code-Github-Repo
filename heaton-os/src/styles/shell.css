@@ -380,6 +380,16 @@
   color: var(--paper);
 }
 
+.reader-tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.reader-tool:disabled:hover {
+  background: none;
+  color: inherit;
+}
+
 .frontmatter-card {
   border: var(--border);
   border-radius: var(--radius);
@@ -422,6 +432,56 @@
   padding: 0 0.3ch;
 }
 
+/* The columns row: an optional contents rail beside the reading column
+   (brief 03 §2). .reader-body keeps centring itself within whatever space
+   remains, so the measure is never affected by the rail's presence. */
+.reader-columns {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.reader-toc {
+  flex: 0 0 var(--reader-toc-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  position: sticky;
+  top: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+}
+
+.reader-toc-item {
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.reader-toc-item:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.reader-toc-item.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.reader-toc-sub {
+  padding-left: var(--space-4);
+}
+
+/* Below this the rail crowds the reading column, so it hides rather than
+   stacking above the text (brief 03 §2). */
+@container (max-width: 1100px) {
+  .reader-toc {
+    display: none;
+  }
+}
+
 /* The text column: quiet, literary, generous measure (brief §6/§7).
    Centered so the measure reads as a deliberate column, not text stranded
    flush-left with the rest of a wide pane left dead. */
@@ -431,6 +491,8 @@
   line-height: 1.65;
   max-width: var(--reader-measure);
   width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
   margin-inline: auto;
 }
 
@@ -617,6 +679,29 @@ a.ref-unresolved {
 .backlinks-empty {
   color: var(--ink-soft);
   padding: var(--space-2);
+}
+
+/* Outbound "Links to" list (brief 03 §5) sits beside "Referenced by", sharing
+   its list/row styling so the two read as one panel, not two competing ones. */
+.backlinks-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.backlinks-group-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: var(--space-1) var(--space-2);
+}
+
+@container (max-width: 720px) {
+  .backlinks-groups {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Viewers -------------------------------------------------------------------- */
@@ -2262,6 +2347,9 @@ a.ref-unresolved {
   min-height: 0;
   overflow: auto;
   padding: var(--space-5);
+  /* Reader's contents rail queries pane width, not viewport width, since a
+     split pane can be narrow on a wide window (brief 03 §2). */
+  container-type: inline-size;
 }
 
 /* --- Narrow screens: sidebar collapses to icons, split stacks ------------ */

@@ -23,7 +23,7 @@ function renderTab(tab: Tab, tree: TreeDir | null, error: string | null) {
     case "files":
       return <FilesWindow tree={tree} error={error} />;
     case "reader":
-      return <ReaderWindow windowId={tab.id} path={tab.payload.path} />;
+      return <ReaderWindow windowId={tab.id} path={tab.payload.path} tree={tree} />;
     case "viewer":
       return <ViewerWindow path={tab.payload.path} kind={tab.payload.kind} />;
     case "tasks":

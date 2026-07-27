@@ -15,9 +15,16 @@ export interface FrontMatterField {
   html: string;
 }
 
+export interface Heading {
+  id: string;
+  text: string;
+  depth: number;
+}
+
 export interface RenderedMarkdown {
   title: string;
   frontmatter: FrontMatterField[];
+  headings: Heading[];
   html: string;
 }
 
@@ -120,6 +127,40 @@ function extractFrontmatter(tree: Root): {
   return { fields, node: quote };
 }
 
+/**
+ * Slug rule (brief §1): lowercase, strip anything not a-z0-9/space/hyphen,
+ * collapse whitespace to a single hyphen. An all-punctuation heading strips
+ * to nothing, so it falls back to a generic base that collision-handling
+ * still numbers sensibly.
+ */
+function slugify(text: string): string {
+  const stripped = text.toLowerCase().replace(/[^a-z0-9\s-]/g, "");
+  return stripped.trim().replace(/\s+/g, "-") || "section";
+}
+
+/**
+ * Give every heading a stable, collision-free id and hand back the plain-text
+ * outline for the client's contents rail. Runs on the mdast tree (not the
+ * rendered HTML) so cross-references inside a heading contribute their plain
+ * text, not markup — and mutates each heading's `data.hProperties.id` so the
+ * id rides through remark-rehype onto the resulting h1-h6 element.
+ */
+function extractHeadings(tree: Root): Heading[] {
+  const headings: Heading[] = [];
+  const seen = new Map<string, number>();
+  visit(tree, "heading", (node) => {
+    const text = mdToString(node).trim();
+    const base = slugify(text);
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    const id = count === 0 ? base : `${base}-${count + 1}`;
+    node.data ??= {};
+    node.data.hProperties = { ...(node.data.hProperties ?? {}), id };
+    headings.push({ id, text, depth: node.depth });
+  });
+  return headings;
+}
+
 const toHtml = unified()
   .use(remarkRehype, { allowDangerousHtml: false })
   .use(rehypeStringify);
@@ -143,6 +184,10 @@ export function renderMarkdown(
     tree.children = tree.children.filter((n) => n !== node);
   }
 
+  // Headings are extracted from the stripped tree so ids line up with what's
+  // actually rendered, and before renderNodes() so the ids ride along.
+  const headings = extractHeadings(tree);
+
   const frontmatter: FrontMatterField[] = fields.map((f) => ({
     label: f.label,
     html: renderNodes([{ type: "paragraph", children: f.nodes }])
@@ -156,6 +201,7 @@ export function renderMarkdown(
   return {
     title: m ? m[1]!.trim() : docPath.split("/").pop()!.replace(/\.md$/i, ""),
     frontmatter,
+    headings,
     html: renderNodes(tree.children),
   };
 }
