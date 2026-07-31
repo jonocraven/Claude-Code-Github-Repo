@@ -143,6 +143,22 @@ export function postAction(action: "reveal" | "open", path: string): Promise<unk
 
 export type MemoryStatus = "green" | "amber" | "red";
 
+export type EntryKind = "fact" | "decision" | "open" | "note";
+
+export interface MemoryEntry {
+  kind: EntryKind;
+  text: string;
+  section: string | null;
+  line: number;
+  depth: number;
+}
+
+export interface MemoryStructure {
+  entries: MemoryEntry[];
+  counts: Record<EntryKind, number>;
+  sections: { name: string; count: number }[];
+}
+
 export interface MemoryGauge {
   path: string;
   label: string;
@@ -153,6 +169,7 @@ export interface MemoryGauge {
   linePct: number;
   wordPct: number;
   status: MemoryStatus;
+  structure: MemoryStructure;
 }
 
 export interface MemoryHealth {

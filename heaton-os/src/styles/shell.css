@@ -2716,3 +2716,114 @@ a.ref-unresolved {
     text-align: left;
   }
 }
+
+/* ==========================================================================
+   Memory — structure, not just size
+   ========================================================================== */
+
+.memory {
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+}
+
+/* --- Still open, across the workspace ------------------------------------ */
+
+.mem-open-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+}
+
+.mem-open-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+.mem-open-row:hover { background: var(--paper-deep); }
+
+.mem-open-space {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+  min-width: 11ch;
+}
+
+.mem-open-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- Composition --------------------------------------------------------- */
+
+.mem-comp {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.mem-comp-bar {
+  display: flex;
+  height: 8px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper-deep);
+}
+
+.mem-comp-seg { display: block; }
+
+/* Kind colours are their own scale, deliberately not the space accents —
+   identity and status must not share a palette. */
+.mem-comp-fact     { background: var(--ink-soft); }
+.mem-comp-decision { background: var(--accent-finances); }
+.mem-comp-open     { background: var(--accent-home); }
+.mem-comp-note     { background: var(--ink-faint); }
+
+.mem-comp-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+.mem-comp-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.mem-comp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.mem-trim {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border-left: 3px solid var(--accent-home);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* The gauge is an article now, with its own head button. */
+.gauge-open {
+  width: 100%;
+  text-align: left;
+  border-radius: var(--radius);
+}
+.gauge-open:hover { background: var(--paper-deep); }
