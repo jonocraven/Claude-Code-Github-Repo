@@ -11,7 +11,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "probe:tree": "node scripts/probe-tree.mjs"
+    "probe:tree": "node scripts/probe-tree.mjs",
+    "probe:search": "node scripts/probe-search.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",

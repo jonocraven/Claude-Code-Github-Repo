@@ -136,11 +136,17 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // Walks the same order `entries` was built in, so the keyboard highlight and
+  // the rendered rows agree. `key` is returned separately rather than spread:
+  // React 19 warns when a key arrives via {...props}, and the warning is right
+  // — a spread key is invisible at the call site.
   let cursor = -1;
   const rowClass = (key: string) => {
     cursor += 1;
-    const isActive = cursor === active;
-    return { className: `palette-row${isActive ? " is-active" : ""}`, key };
+    return {
+      key,
+      props: { className: `palette-row${cursor === active ? " is-active" : ""}` },
+    };
   };
 
   return (
@@ -198,7 +204,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     style={{ color: `var(${a.accentVar})` }}
                     onClick={() => {
                       openApp(a.id);
@@ -222,7 +228,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
                       openFile(entry.path);
                       onClose();
@@ -246,7 +252,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
                       openFile(hit.path, { restore: false });
                       onClose();
@@ -276,7 +282,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
                       openFile(hit.path, { restore: false });
                       onClose();
@@ -301,7 +307,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
                       openFile(hit.path, { restore: false });
                       onClose();
@@ -333,7 +339,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
             )}
 
           {query.trim() && (
-            <button type="button" {...rowClass("all")} onClick={() => {
+            <button type="button" {...rowClass("all").props} onClick={() => {
               openSearch(query.trim(), space);
               onClose();
             }}>
