@@ -5,7 +5,6 @@ import fsp from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { EnvHttpProxyAgent, setGlobalDispatcher } from "undici";
 import { HOST, PORT, WORKSPACE_ROOT } from "./config.js";
-import { buildTree } from "./tree.js";
 import { safeAbsolute } from "./paths.js";
 import { renderMarkdown } from "./markdown.js";
 import { getState, initState, onChange } from "./state.js";
@@ -82,7 +81,7 @@ app.get("/api/tree", async (_req, reply) => {
       message: `WORKSPACE_ROOT does not exist: ${WORKSPACE_ROOT}. Set it in .env.`,
     });
   }
-  return buildTree(WORKSPACE_ROOT);
+  return getState().tree;
 });
 
 app.get<{ Querystring: { path?: string } }>("/api/file", async (req, reply) => {
