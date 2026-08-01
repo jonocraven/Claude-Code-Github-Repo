@@ -4,7 +4,10 @@
 > (Sonnet or Haiku) instead of being done by hand.
 > **Why:** Several roadmap items are closed-form and testable. Those are worth
 > delegating; the ones that turn on product judgement or visual taste are not.
-> **Status:** Five briefs ready. None have been run yet.
+> **Status:** Eight briefs, all run and merged. Every one shipped work that
+> compiled and passed its own tests; four of the six also shipped a defect only
+> findable by exercising the feature as it actually runs. The verification
+> section below is the part that earns its keep.
 
 ## The rule used to decide
 
@@ -33,6 +36,9 @@ the chance to think it through.
 | 03 | [Reader navigation](03-reader-navigation.md) | Sonnet | TOC, position memory, next/prev, backlinks — all mechanical, all assertable. |
 | 04 | [Incremental indexing](04-incremental-indexing.md) | Sonnet | Pure perf refactor with an exact behavioural contract: output must not change. |
 | 05 | [Dark mode](05-dark-mode.md) | Sonnet | Token architecture already supports it, and the palette is supplied — so it's application plus measurement, not design. |
+| 06 | [Tree cache](06-tree-cache.md) | Sonnet | Pure perf refactor with an exact contract: the JSON must not change. |
+| 07 | [Activity from state](07-activity-from-state.md) | Sonnet | Same shape as 06, with 06 as the worked example to copy. |
+| 08 | [Connection graph](08-connections.md) | Sonnet | Analysis over a graph that already exists; every question has one right answer. |
 
 ## What to keep in-house
 
@@ -41,7 +47,8 @@ the chance to think it through.
 | **Today view** | The judgement *is* the deliverable — what earns a place, how it ranks, what "since you last looked" means. Delegating this delegates the product. |
 | **Structured memory schema** | Data modelling. Get the schema wrong and everything built on it inherits the mistake. Design it first, *then* the parser is delegable (see note in 04). |
 | **Visual hierarchy & type scale** | Taste. The whole task is deciding what recedes. |
-| **Calendar merge — visual encoding** | Three event types in one cell without mush is a design problem. The *data* half could be delegated once the encoding is fixed. |
+| **Calendar merge — visual encoding** | ~~Three event types in one cell without mush is a design problem.~~ Done in-house: colour was already spent on spaces, so type is carried by mark shape. The data half needed no delegation in the end — the client composes the two endpoints that already existed. |
+| **Connections — the surface** | Brief 08 delegated the graph analysis and explicitly excluded the UI. Deciding that a seam is undirected, and that the pair count is the finding while the links are only its evidence, is the product. |
 | **Ask about a space** | Architecture plus prompt design, and it's the feature most likely to be confidently wrong. |
 
 ## Running one
@@ -132,7 +139,17 @@ These apply to all delegated work in this repo and are repeated in each brief:
     that contradicts the code is a finding to report, not a thing to quietly
     paper over — and "no discrepancies" when there were some is the single
     least useful thing you can return.
-11. **Verify your base commit before writing anything** (see "Running one").
+11. **A test that mirrors the implementation does not test it.** Brief 06's
+    suite reimplemented `incrementalUpdate`'s orchestration inside the test
+    file — because `server/state.ts` closes over a module-level
+    `WORKSPACE_ROOT` and could not be pointed at a fixture. Deleting the real
+    refresh line left **all 130 tests green** while the feature was dead. The
+    agent found and reported this honestly, which is the behaviour these rules
+    are for. When you cannot reach the real code path, say so plainly and add
+    a probe that drives it for real (`npm run probe:tree` is the pattern:
+    boot the server, change the workspace, assert over HTTP). Do not let a
+    mirror stand in for coverage without naming it as one.
+12. **Verify your base commit before writing anything** (see "Running one").
     If a test fails for a reason that looks unrelated to your work, check the
     base *before* dismissing it as pre-existing — on brief 02 four such
     failures were entirely an artefact of a stale checkout.

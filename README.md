@@ -109,7 +109,57 @@ The defaults in `.env.example` already point at `/Users/jonathancraven/Claude`, 
   space memory hero crops with a "read in full" rather than clipping
   mid-sentence, and the app has a document outline and AA-contrast chrome.
 
-Tests went from 22 to 89, and `npm test` now passes on a clean clone.
+- **Search is a surface, not just ⌘K** — a real window in the System list
+  (`Search`). It persists, holds its query across a reload, shows the whole set
+  rather than the top twelve, groups results by space with counts so you can
+  see where a subject actually lives, and opening a result doesn't destroy it.
+  ⌘K is unchanged and is now labelled *Jump to…* in the rail, because the two
+  are different tools: ⌘K is for when you know what you want and want to be
+  gone. Its last row hands the query over to the window when you don't.
+- **Filenames are searchable** — only markdown is full-text indexed, so until
+  now a PDF or a photo was invisible to search entirely. Every file is now
+  findable by name, ranked so a filename hit beats a folder-name hit.
+- **Dark mode** — a warm dark in the same print-craft register, not a grey
+  theme. Toggle in the top bar cycles light → dark → follow-the-OS, applied
+  before first paint so there's no flash. Every screen measured at WCAG AA in
+  both themes.
+- **Light-mode contrast fixed** — four accent colours (Cookery Books, Home,
+  Side Hustle, Life Plan) failed AA as text; Home was at 2.91:1. Hue is
+  unchanged, they're just deeper. This is a visible change to the palette.
+- **A memory file can be retired by renaming it** — the `(ignore)` convention
+  only ever worked on folders, because the check ran past the file extension.
+  `Draft (ignore).md` is now hidden everywhere, as it always read like it
+  should be.
+- **`/api/tree` is served from memory** — it used to re-walk the workspace and
+  stat every file on every request, including on every change broadcast. On a
+  Drive-synced folder those stats hit the network.
+
+- **Timeline replaces Activity and Calendar** — they were one surface split by
+  tense. Now a single spine of days: past above, future below, today anchored
+  with the only rule on the page, and the view lands there rather than at the
+  top. Quiet stretches collapse to "3 quiet days" instead of padding the page
+  with blanks. The month grid survives as a second view. Changes, scheduled
+  runs and due tasks share the spine and are told apart by mark *shape*, since
+  colour already means space everywhere else. Tabs saved as Activity or
+  Calendar are migrated on load, title included.
+- **Connections** — a new window for the three questions the app could not
+  answer at all: which spaces actually touch (grouped by pair, so "House Move
+  ↔ Finances, 3 links" is the finding), which documents are load-bearing, and
+  which are forgotten — nothing links to them, stalest first.
+- **Recent activity comes from memory too** — it used to walk the whole
+  workspace and stat every file on every request, so flicking between the
+  7/14/30-day ranges triggered three full walks of a Drive-synced folder.
+- **System surfaces stay put** — Today, Timeline, Search, Files, Tasks, Memory
+  and Connections open as kept tabs. Clicking a result from one of them used to
+  destroy the surface you clicked it from. Spaces are still previews, which is
+  what previews were introduced for.
+
+Tests went from 22 to 191, plus six probes that drive the real thing:
+`npm run probe:search`, `probe:tree`, `probe:recent`, `probe:timeline`,
+`probe:connections` and `probe:contrast`. They exist because several pieces of
+this work passed their own unit tests while being broken in the browser — for
+one of them the entire suite stayed green with the feature deleted. The probes
+are the part that actually caught it.
 
 ## What exists so far
 

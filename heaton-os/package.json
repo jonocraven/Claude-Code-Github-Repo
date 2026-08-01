@@ -10,7 +10,13 @@
     "web": "vite --open",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "probe:tree": "node scripts/probe-tree.mjs",
+    "probe:recent": "node scripts/probe-recent.mjs",
+    "probe:search": "node scripts/probe-search.mjs",
+    "probe:contrast": "node scripts/contrast-check.mjs",
+    "probe:timeline": "node scripts/probe-timeline.mjs",
+    "probe:connections": "node scripts/probe-connections.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
@@ -47,6 +53,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "concurrently": "^10.0.3",
+    "playwright": "^1.62.1",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",

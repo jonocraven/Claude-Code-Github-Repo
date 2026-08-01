@@ -16,6 +16,9 @@ export type Pane = "left" | "right";
 export interface TabPayload {
   path?: string;
   kind?: string;
+  /** Search tabs only — persisted so a reload restores the result set. */
+  query?: string;
+  space?: string | null;
 }
 
 export interface Tab {
@@ -83,6 +86,29 @@ interface Persisted {
   sidebarCollapsed: boolean;
 }
 
+/**
+ * Activity and Calendar merged into Timeline. A saved layout still carries the
+ * old ids, and while ContentArea resolves both, a restored tab would otherwise
+ * keep its stale title for ever — the rail says Timeline and the tab says
+ * Activity. Rewriting them on load also collapses the pair, since a workspace
+ * with both open would otherwise restore two identical Timelines.
+ */
+const RETIRED_APPS: Record<string, string> = { activity: "timeline", calendar: "timeline" };
+
+function migrate(tabs: Tab[]): Tab[] {
+  const seen = new Set<string>();
+  const out: Tab[] = [];
+  for (const t of tabs) {
+    const appId = RETIRED_APPS[t.appId] ?? t.appId;
+    const title = appId === t.appId ? t.title : "Timeline";
+    const key = `${appId}:${t.instanceKey}:${t.pane}`;
+    if (appId !== t.appId && seen.has(key)) continue;
+    seen.add(key);
+    out.push({ ...t, appId, title });
+  }
+  return out;
+}
+
 function load(): Partial<TabState> {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -92,7 +118,7 @@ function load(): Partial<TabState> {
     return {
       // Sessions saved before previews existed have no `transient` field.
       // Treat those tabs as kept — restoring a workspace must never drop one.
-      tabs: p.tabs.map((t) => ({ ...t, transient: t.transient ?? false })),
+      tabs: migrate(p.tabs.map((t) => ({ ...t, transient: t.transient ?? false }))),
       activeLeft: p.activeLeft ?? null,
       activeRight: p.split ? (p.activeRight ?? null) : null,
       split: !!p.split,
@@ -156,7 +182,6 @@ export const useTabs = create<TabState>((set, get) => {
     sidebarCollapsed: persisted.sidebarCollapsed ?? false,
 
     openTab: ({ appId, instanceKey = "", title, payload = {}, pane, transient = true }) => {
-      if (appId === "search") return ""; // search is the palette, never a tab
       const { tabs, activePane, split } = get();
 
       const existing = tabs.find(
@@ -193,7 +218,27 @@ export const useTabs = create<TabState>((set, get) => {
       return id;
     },
 
-    openApp: (appId) => get().openTab({ appId }),
+    /**
+     * Launching an app from the rail.
+     *
+     * System surfaces (Today, Timeline, Search, Files, Tasks, Memory) open
+     * *kept*. You reach for one of those in order to work from it, and a
+     * surface you destroy by clicking its own first result is not one you can
+     * work from — the Timeline in particular exists to be clicked through.
+     *
+     * Spaces stay previews. That is the case previews were introduced for:
+     * browsing eight spaces should cost one tab, not eight.
+     *
+     * Search additionally carries a query, so it routes through openSearch,
+     * which reuses and re-aims rather than opening a blank second one.
+     */
+    openApp: (appId) => {
+      if (appId === "search") {
+        openSearch();
+        return;
+      }
+      get().openTab({ appId, transient: getApp(appId).kind !== "system" });
+    },
 
     reveal: (path) => {
       const clean = path.replace(/\/$/, "");
@@ -357,6 +402,40 @@ export function consumeSkipRestore(tabId: string): boolean {
   const had = skipRestoreTabs.has(tabId);
   skipRestoreTabs.delete(tabId);
   return had;
+}
+
+/**
+ * Open (or reuse) the Search window, optionally carrying a query in.
+ *
+ * There is deliberately one Search tab per pane rather than one per query.
+ * The window is a place you go back to and re-aim, so a second tab for every
+ * phrase you tried would be tab litter, not history — and the tab title
+ * tracking the query already tells you which search it is holding.
+ *
+ * It opens *kept*, never as a preview: a search you can lose by clicking its
+ * own first result is not a surface you can work from.
+ */
+export function openSearch(query = "", space: string | null = null): void {
+  const title = query.trim() ? `Search: ${query.trim()}` : "Search";
+  const open = useTabs.getState().openTab;
+  const existing = useTabs
+    .getState()
+    .tabs.find((t) => t.appId === "search");
+  if (existing) {
+    // Re-aim the tab that exists rather than stacking another one beside it —
+    // but only when a query was actually supplied. Reaching for Search in the
+    // dock means "show me that again", not "throw away what I had typed".
+    if (query.trim()) {
+      useTabs.getState().retarget(existing.id, {
+        instanceKey: "",
+        title,
+        payload: { query, space },
+      });
+    }
+    useTabs.getState().activate(existing.id);
+    return;
+  }
+  open({ appId: "search", title, payload: { query, space }, transient: false });
 }
 
 /** Route a workspace file to the right tab type (markdown → Reader, else viewer). */

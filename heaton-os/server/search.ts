@@ -8,6 +8,27 @@ export interface KeywordHit {
   space: string | null;
   snippet: string;
   score: number;
+  /** Carried so a result list can be re-sorted by recency without a second call. */
+  modified: string;
+}
+
+/**
+ * A filename match. Only markdown is full-text indexed, so without this a PDF
+ * called `Mortgage-offer.pdf` is unfindable by search even though it is the
+ * thing being looked for. Matching names over the whole file set closes that
+ * hole without pretending to read binary content.
+ */
+export interface FileHit {
+  path: string;
+  name: string;
+  space: string | null;
+  ext: string;
+}
+
+export interface KeywordResult {
+  hits: KeywordHit[];
+  /** Matches before `limit` — so the UI can say "12 of 47" honestly. */
+  total: number;
 }
 
 interface IndexedDoc {
@@ -119,17 +140,72 @@ export function searchKeyword(
   query: string,
   space: string | null,
   limit = 12
-): KeywordHit[] {
+): KeywordResult {
   const terms = query.split(/\s+/).filter(Boolean);
-  return index
-    .search(query)
-    .filter((r) => !space || r.space === space)
-    .slice(0, limit)
-    .map((r) => ({
+  const matched = index.search(query).filter((r) => !space || r.space === space);
+  return {
+    total: matched.length,
+    hits: matched.slice(0, limit).map((r) => ({
       path: r.path as string,
       title: r.title as string,
       space: r.space as string | null,
       snippet: makeSnippet(corpus.docs.get(r.id as string)?.body ?? "", terms),
       score: r.score,
-    }));
+      modified: corpus.docs.get(r.id as string)?.modified ?? "",
+    })),
+  };
+}
+
+/**
+ * Filename matches across every file, markdown or not, excluding the ones the
+ * full-text index already returned — a document that matched on content should
+ * not also appear as a weaker name match.
+ *
+ * Every term must appear somewhere in the path, so "mortgage offer" finds
+ * `House-Move/Mortgage/offer-2026.pdf`. Ranking is by how early the first term
+ * lands in the basename: a name that *starts* with the term beats one that
+ * merely contains it, and a hit in the filename beats one in a parent folder.
+ */
+export function searchFilenames(
+  corpus: Corpus,
+  query: string,
+  space: string | null,
+  exclude: ReadonlySet<string>,
+  limit = 12
+): FileHit[] {
+  const terms = query.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
+  if (terms.length === 0) return [];
+
+  const scored: { hit: FileHit; rank: number }[] = [];
+  for (const p of corpus.files) {
+    if (exclude.has(p)) continue;
+    const hitSpace = spaceOf(p);
+    if (space && hitSpace !== space) continue;
+
+    // Plain substring containment, which already sees through this workspace's
+    // hyphen and underscore naming — "mortgage offer" reaches
+    // `Mortgage-offer.pdf` because both terms sit inside that string as-is.
+    // Word-boundary matching would be stricter and worse here: filenames are
+    // where partial words live (`week-29`, `q1-fcast`).
+    const haystack = p.toLowerCase();
+    if (!terms.every((t) => haystack.includes(t))) continue;
+
+    const name = p.slice(p.lastIndexOf("/") + 1);
+    const at = name.toLowerCase().indexOf(terms[0]!);
+    scored.push({
+      hit: {
+        path: p,
+        name,
+        space: hitSpace,
+        ext: name.includes(".") ? name.slice(name.lastIndexOf(".") + 1).toLowerCase() : "",
+      },
+      // Not in the basename at all — it matched a folder, so it ranks last.
+      rank: at === -1 ? 1000 : at,
+    });
+  }
+
+  return scored
+    .sort((a, b) => a.rank - b.rank || a.hit.path.localeCompare(b.hit.path, "en-GB"))
+    .slice(0, limit)
+    .map((s) => s.hit);
 }

@@ -3,13 +3,14 @@ import type { TreeDir } from "../api";
 import { AppIcon } from "../icons";
 import { SPACE_CONFIG } from "../spaces";
 import { useTabs, type Pane, type Tab } from "../store/tabs";
-import { ActivityWindow } from "../windows/ActivityWindow";
-import { CalendarWindow } from "../windows/CalendarWindow";
+import { ConnectionsWindow } from "../windows/ConnectionsWindow";
 import { FilesWindow } from "../windows/FilesWindow";
 import { MemoryWindow } from "../windows/MemoryWindow";
 import { ReaderWindow } from "../windows/ReaderWindow";
+import { SearchWindow } from "../windows/SearchWindow";
 import { SpaceWindow } from "../windows/SpaceWindow";
 import { TasksWindow } from "../windows/TasksWindow";
+import { TimelineWindow } from "../windows/TimelineWindow";
 import { TodayWindow } from "../windows/TodayWindow";
 import { ViewerWindow } from "../windows/ViewerWindow";
 import { WelcomeWindow } from "../windows/WelcomeWindow";
@@ -24,16 +25,29 @@ function renderTab(tab: Tab, tree: TreeDir | null, error: string | null) {
       return <FilesWindow tree={tree} error={error} />;
     case "reader":
       return <ReaderWindow windowId={tab.id} path={tab.payload.path} tree={tree} />;
+    case "search":
+      return (
+        <SearchWindow
+          windowId={tab.id}
+          initialQuery={tab.payload.query ?? ""}
+          initialSpace={tab.payload.space ?? null}
+        />
+      );
     case "viewer":
       return <ViewerWindow path={tab.payload.path} kind={tab.payload.kind} />;
     case "tasks":
       return <TasksWindow />;
-    case "calendar":
-      return <CalendarWindow />;
     case "memory":
       return <MemoryWindow />;
+    case "connections":
+      return <ConnectionsWindow />;
+    // "calendar" and "activity" are the pre-merge ids, still arriving from
+    // saved layouts. They resolve here rather than falling through to
+    // "Unknown view".
+    case "timeline":
+    case "calendar":
     case "activity":
-      return <ActivityWindow />;
+      return <TimelineWindow />;
     default:
       if (SPACE_CONFIG[tab.appId]) return <SpaceWindow spaceId={tab.appId} tree={tree} />;
       return <div className="tree-state">Unknown view.</div>;

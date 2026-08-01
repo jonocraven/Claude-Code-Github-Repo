@@ -13,8 +13,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--boot-ground);
+  color: var(--boot-ink);
   padding: var(--space-5);
 }
 
@@ -556,6 +556,25 @@
   box-shadow: var(--shadow-hard-sm);
 }
 
+/* --ink/--paper swap wholesale in dark mode, which would turn this into a
+   light block floating on an already-dark reading page. Pin it to the
+   recessed dark surface instead, so it stays a dark panel with light text —
+   the same visual role it plays in light mode — rather than inverting. */
+@media (prefers-color-scheme: dark) {
+  .reader-body pre {
+    background: var(--paper-deep);
+    color: var(--ink);
+  }
+}
+:root[data-theme="dark"] .reader-body pre {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+:root[data-theme="light"] .reader-body pre {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .reader-body pre code {
   background: none;
   border: none;
@@ -783,7 +802,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -1810,7 +1829,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 110;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1882,6 +1901,21 @@ a.ref-unresolved {
   background-color: var(--paper);
   /* Paper grain sits behind everything; opaque panels cover it, and the
      transparent pane bodies let it show through under the content. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Dark mode: same reasoning as the .paper-grain overlay in global.css — a
+   dark tint reads as dirt on a dark ground, so swap to a light tint at the
+   same alpha this file already used, keeping the two grains consistent. */
+@media (prefers-color-scheme: dark) {
+  .shell {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] .shell {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] .shell {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
@@ -2827,3 +2861,497 @@ a.ref-unresolved {
   border-radius: var(--radius);
 }
 .gauge-open:hover { background: var(--paper-deep); }
+
+/* ==========================================================================
+   Search window — the persistent counterpart to the ⌘K palette.
+   Every value is a token, so this inherits any theme change for free.
+   ========================================================================== */
+
+.searchw {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.searchw-head {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  border-bottom: var(--border);
+  background: var(--paper-deep);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.searchw-input {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.searchw-input::placeholder { color: var(--ink-faint); }
+
+.searchw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.searchw-count {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.searchw-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
+.searchw-group { margin-bottom: var(--space-5); }
+
+.searchw-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-2);
+}
+
+.searchw-group-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.searchw-sub {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* A result is a row plus a send-to-split affordance, so opening something to
+   read never costs you the result set you found it in. */
+.sr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  border-radius: var(--radius);
+}
+.sr-row:hover,
+.sr-row.is-active { background: var(--paper-deep); }
+
+.sr-open {
+  display: grid;
+  grid-template-columns: 3px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: stretch;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.sr-rule { border-radius: 2px; }
+
+.sr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sr-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-snippet {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sr-snippet mark {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid currentColor;
+}
+
+.sr-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-split {
+  padding: 0 var(--space-3);
+  color: var(--ink-faint);
+  opacity: 0;
+  flex-shrink: 0;
+}
+.sr-row:hover .sr-split,
+.sr-row.is-active .sr-split,
+.sr-split:focus-visible { opacity: 1; }
+.sr-split:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Timeline — one spine of days, past above and future below, today anchored.
+   Colour means space (as everywhere); event type is carried by mark shape.
+   ========================================================================== */
+
+.timeline {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.timeline-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: var(--border);
+  background: var(--paper-deep);
+}
+
+.timeline-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
+.tl-day {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  align-items: start;
+}
+
+/* The past recedes; what is ahead reads at full weight. */
+.tl-day.is-past .tl-entry-name { color: var(--ink-soft); }
+
+.tl-daylabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0;
+  padding-top: var(--space-1);
+  position: sticky;
+  top: 0;
+}
+
+.tl-daycount {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+/* Today is the anchor, so it gets the only rule on the spine. */
+.tl-day-today {
+  border-top: var(--border);
+  border-bottom: var(--border);
+  padding: var(--space-3) 0;
+  margin: var(--space-2) 0;
+}
+.tl-day-today .tl-daylabel {
+  color: var(--ink);
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+.tl-day-today.is-past .tl-entry-name { color: var(--ink); }
+
+.tl-quiet {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-1) 0 0;
+}
+
+.tl-gap {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-2) 0 var(--space-2) 132px;
+  font-style: italic;
+}
+
+.tl-entries {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tl-entry {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.tl-entry:hover { background: var(--paper-deep); }
+.tl-entry:disabled { cursor: default; }
+.tl-entry:disabled:hover { background: transparent; }
+
+.tl-entry-name {
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tl-entry-meta,
+.tl-entry-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.tl-entry-run .tl-entry-name { font-weight: 600; }
+.tl-entry-task.is-overdue .tl-entry-time { color: var(--accent-cookery-books); }
+
+/* The three marks. Shape carries type so colour stays free to mean space. */
+.tl-mark {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  justify-self: center;
+}
+.tl-mark-change { background: var(--mark, var(--ink-faint)); }
+.tl-mark-run {
+  border: 2px solid var(--mark, var(--ink-faint));
+  border-radius: 50%;
+}
+.tl-mark-task {
+  border: 2px solid var(--ink-soft);
+  border-radius: 1px;
+}
+
+.tl-more {
+  align-self: start;
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  padding: var(--space-1) var(--space-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.tl-more:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Connections — seams between spaces, load-bearing docs, forgotten ones.
+   ========================================================================== */
+
+.cx {
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-5);
+}
+
+.cx-section { margin-bottom: var(--space-6); }
+
+.cx-note {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-3);
+  max-width: 62ch;
+}
+
+.cx-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* A seam is a claim ("these two spaces touch, 3 times") with its evidence
+   folded away underneath — the count is the finding, the links are the proof. */
+.cx-seams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cx-seam {
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.cx-seam-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-3);
+}
+
+.cx-seam-name {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cx-seam-join { color: var(--ink-faint); }
+
+.cx-caret {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: var(--text-small);
+}
+
+/* Bullets are opted out per list rather than globally: Reader content is
+   markdown and its lists must keep theirs. */
+.cx-links {
+  border-top: var(--border);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+}
+
+.cx-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-link:hover { background: var(--paper-deep); }
+
+.cx-link-pair {
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-link-snippet {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cx-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-row:hover { background: var(--paper-deep); }
+
+.cx-row-name {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cx-row-meta,
+.cx-row-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.cx-table {
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.cx-tr {
+  display: grid;
+  grid-template-columns: minmax(140px, 2fr) repeat(5, minmax(56px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+.cx-tr + .cx-tr { border-top: 1px solid var(--paper-deep); }
+
+.cx-th {
+  background: var(--paper-deep);
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: var(--border);
+}
+
+.cx-td-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
