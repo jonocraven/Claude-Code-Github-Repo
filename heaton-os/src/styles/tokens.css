@@ -69,3 +69,81 @@
   --dur-quick: 140ms;
   --dur-scene: 320ms;
 }
+
+/* ==========================================================================
+   Dark mode — same print-craft register at night, not a generic grey theme.
+   Ground stays warm; accents lift for legibility on dark. Applies via the OS
+   preference, an explicit :root[data-theme] wins over it in both directions.
+   Everything not redefined here (spacing, type, radii, motion) is unchanged.
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1f1b16;
+    --paper-deep: #17140f;
+    --ink: #f0e9dc;
+    --ink-soft: #b8ac9a;
+    --ink-faint: #8a7f6f;
+
+    --accent-cookery-books: #f2705a;
+    --accent-wfdinner: #7fb262;
+    --accent-home: #e8a63f;
+    --accent-house-move: #85a6c4;
+    --accent-job-search: #9a86d8;
+    --accent-finances: #6fa87f;
+    --accent-side-hustle: #f489b8;
+    --accent-life-plan: #b3a996;
+    --accent-system: #f0e9dc;
+
+    /* --ink shadows are invisible on a dark ground, so dark mode swaps the
+       hard offset shadows to near-black at the same offsets — no blur. */
+    --shadow-hard: 4px 4px 0 #000;
+    --shadow-hard-lg: 6px 6px 0 #000;
+    --shadow-hard-sm: 3px 3px 0 #000;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #1f1b16;
+  --paper-deep: #17140f;
+  --ink: #f0e9dc;
+  --ink-soft: #b8ac9a;
+  --ink-faint: #8a7f6f;
+
+  --accent-cookery-books: #f2705a;
+  --accent-wfdinner: #7fb262;
+  --accent-home: #e8a63f;
+  --accent-house-move: #85a6c4;
+  --accent-job-search: #9a86d8;
+  --accent-finances: #6fa87f;
+  --accent-side-hustle: #f489b8;
+  --accent-life-plan: #b3a996;
+  --accent-system: #f0e9dc;
+
+  --shadow-hard: 4px 4px 0 #000;
+  --shadow-hard-lg: 6px 6px 0 #000;
+  --shadow-hard-sm: 3px 3px 0 #000;
+}
+
+/* An explicit light override must win over the OS preference too, so a user
+   who prefers dark system-wide can still pin Heaton OS to light. */
+:root[data-theme="light"] {
+  --paper: #faf6ee;
+  --paper-deep: #f3ecdd;
+  --ink: #1c1814;
+  --ink-soft: #4a4238;
+  --ink-faint: #8a8072;
+
+  --accent-cookery-books: #d8452b;
+  --accent-wfdinner: #4e7a3a;
+  --accent-home: #c9821b;
+  --accent-house-move: #53708e;
+  --accent-job-search: #4b3a8c;
+  --accent-finances: #2e5d3e;
+  --accent-side-hustle: #e05c96;
+  --accent-life-plan: #857d6f;
+  --accent-system: #1c1814;
+
+  --shadow-hard: 4px 4px 0 var(--ink);
+  --shadow-hard-lg: 6px 6px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+}

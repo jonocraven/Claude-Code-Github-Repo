@@ -556,6 +556,25 @@
   box-shadow: var(--shadow-hard-sm);
 }
 
+/* --ink/--paper swap wholesale in dark mode, which would turn this into a
+   light block floating on an already-dark reading page. Pin it to the
+   recessed dark surface instead, so it stays a dark panel with light text —
+   the same visual role it plays in light mode — rather than inverting. */
+@media (prefers-color-scheme: dark) {
+  .reader-body pre {
+    background: var(--paper-deep);
+    color: var(--ink);
+  }
+}
+:root[data-theme="dark"] .reader-body pre {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+:root[data-theme="light"] .reader-body pre {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .reader-body pre code {
   background: none;
   border: none;
@@ -1882,6 +1901,21 @@ a.ref-unresolved {
   background-color: var(--paper);
   /* Paper grain sits behind everything; opaque panels cover it, and the
      transparent pane bodies let it show through under the content. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Dark mode: same reasoning as the .paper-grain overlay in global.css — a
+   dark tint reads as dirt on a dark ground, so swap to a light tint at the
+   same alpha this file already used, keeping the two grains consistent. */
+@media (prefers-color-scheme: dark) {
+  .shell {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] .shell {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] .shell {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
