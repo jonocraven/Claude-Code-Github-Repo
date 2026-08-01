@@ -12,14 +12,14 @@
   --ink-faint: #8a8072;
 
   /* --- Per-space accents (brief §5) ---------------------------------- */
-  --accent-cookery-books: #d8452b; /* tomato red   */
+  --accent-cookery-books: #cc3f26; /* tomato red   */
   --accent-wfdinner: #4e7a3a;      /* basil green  */
-  --accent-home: #c9821b;          /* ochre        */
+  --accent-home: #996314;          /* ochre        */
   --accent-house-move: #53708e;    /* slate blue   */
   --accent-job-search: #4b3a8c;    /* ink violet   */
   --accent-finances: #2e5d3e;      /* forest green */
-  --accent-side-hustle: #e05c96;   /* candy pink   */
-  --accent-life-plan: #857d6f;     /* warm grey    */
+  --accent-side-hustle: #d32873;   /* candy pink   */
+  --accent-life-plan: #787064;     /* warm grey    */
   --accent-system: #1c1814;        /* system apps run on ink */
 
   /* --- Borders and shadows ------------------------------------------ */
@@ -28,6 +28,13 @@
   --shadow-hard: 4px 4px 0 var(--ink);
   --shadow-hard-lg: 6px 6px 0 var(--ink);
   --shadow-hard-sm: 3px 3px 0 var(--ink);
+  /* Modal dimming. Not derived from --ink: a scrim must always darken, and
+     --ink flips light in dark mode, which turned this into a glare. */
+  --scrim: rgba(28, 24, 20, 0.35);
+  /* The boot screen deliberately inverts in light mode. In dark it must not,
+     or launching the app flashes a bright screen before a dark one. */
+  --boot-ground: var(--ink);
+  --boot-ink: var(--paper);
   --radius: 2px;
   --radius-lg: 6px;
 
@@ -38,6 +45,7 @@
   /* Reader exception (§7): long-form text runs in a quiet literary serif. */
   --font-reading: "Lora", Georgia, serif;
   --reader-measure: 68ch;
+  --reader-toc-w: 176px;
 
   --text-body: 1rem;        /* ≥16px, always */
   --text-small: 0.875rem;   /* metadata only, never body copy */
@@ -67,4 +75,93 @@
   --ease-snap: cubic-bezier(0.2, 0.9, 0.3, 1.2);
   --dur-quick: 140ms;
   --dur-scene: 320ms;
+}
+
+/* ==========================================================================
+   Dark mode — same print-craft register at night, not a generic grey theme.
+   Ground stays warm; accents lift for legibility on dark. Applies via the OS
+   preference, an explicit :root[data-theme] wins over it in both directions.
+   Everything not redefined here (spacing, type, radii, motion) is unchanged.
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1f1b16;
+    --paper-deep: #17140f;
+    --ink: #f0e9dc;
+    --ink-soft: #b8ac9a;
+    --ink-faint: #8a7f6f;
+
+    --accent-cookery-books: #f2705a;
+    --accent-wfdinner: #7fb262;
+    --accent-home: #e8a63f;
+    --accent-house-move: #85a6c4;
+    --accent-job-search: #9a86d8;
+    --accent-finances: #6fa87f;
+    --accent-side-hustle: #f489b8;
+    --accent-life-plan: #b3a996;
+    --accent-system: #f0e9dc;
+
+    /* --ink shadows are invisible on a dark ground, so dark mode swaps the
+       hard offset shadows to near-black at the same offsets — no blur. */
+    --shadow-hard: 4px 4px 0 #000;
+    --shadow-hard-lg: 6px 6px 0 #000;
+    --shadow-hard-sm: 3px 3px 0 #000;
+    --scrim: rgba(0, 0, 0, 0.62);
+    --boot-ground: #17140f;
+    --boot-ink: #f0e9dc;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #1f1b16;
+  --paper-deep: #17140f;
+  --ink: #f0e9dc;
+  --ink-soft: #b8ac9a;
+  --ink-faint: #8a7f6f;
+
+  --accent-cookery-books: #f2705a;
+  --accent-wfdinner: #7fb262;
+  --accent-home: #e8a63f;
+  --accent-house-move: #85a6c4;
+  --accent-job-search: #9a86d8;
+  --accent-finances: #6fa87f;
+  --accent-side-hustle: #f489b8;
+  --accent-life-plan: #b3a996;
+  --accent-system: #f0e9dc;
+
+  --shadow-hard: 4px 4px 0 #000;
+  --shadow-hard-lg: 6px 6px 0 #000;
+  --shadow-hard-sm: 3px 3px 0 #000;
+
+  --scrim: rgba(0, 0, 0, 0.62);
+  --boot-ground: #17140f;
+  --boot-ink: #f0e9dc;
+}
+
+/* An explicit light override must win over the OS preference too, so a user
+   who prefers dark system-wide can still pin Heaton OS to light. */
+:root[data-theme="light"] {
+  --paper: #faf6ee;
+  --paper-deep: #f3ecdd;
+  --ink: #1c1814;
+  --ink-soft: #4a4238;
+  --ink-faint: #8a8072;
+
+  --accent-cookery-books: #cc3f26;
+  --accent-wfdinner: #4e7a3a;
+  --accent-home: #996314;
+  --accent-house-move: #53708e;
+  --accent-job-search: #4b3a8c;
+  --accent-finances: #2e5d3e;
+  --accent-side-hustle: #d32873;
+  --accent-life-plan: #787064;
+  --accent-system: #1c1814;
+
+  --shadow-hard: 4px 4px 0 var(--ink);
+  --shadow-hard-lg: 6px 6px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+
+  --scrim: rgba(28, 24, 20, 0.35);
+  --boot-ground: var(--ink);
+  --boot-ink: var(--paper);
 }

@@ -13,8 +13,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--boot-ground);
+  color: var(--boot-ink);
   padding: var(--space-5);
 }
 
@@ -380,6 +380,16 @@
   color: var(--paper);
 }
 
+.reader-tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.reader-tool:disabled:hover {
+  background: none;
+  color: inherit;
+}
+
 .frontmatter-card {
   border: var(--border);
   border-radius: var(--radius);
@@ -387,6 +397,8 @@
   background: var(--paper-deep);
   padding: var(--space-4);
   max-width: var(--reader-measure);
+  width: 100%;
+  margin-inline: auto;
 }
 
 .frontmatter-row {
@@ -420,12 +432,68 @@
   padding: 0 0.3ch;
 }
 
-/* The text column: quiet, literary, generous measure (brief §6/§7). */
+/* The columns row: an optional contents rail beside the reading column
+   (brief 03 §2). .reader-body keeps centring itself within whatever space
+   remains, so the measure is never affected by the rail's presence. */
+.reader-columns {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.reader-toc {
+  flex: 0 0 var(--reader-toc-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  position: sticky;
+  top: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+}
+
+.reader-toc-item {
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.reader-toc-item:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.reader-toc-item.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.reader-toc-sub {
+  padding-left: var(--space-4);
+}
+
+/* Below this the rail crowds the reading column, so it hides rather than
+   stacking above the text (brief 03 §2). */
+@container (max-width: 1100px) {
+  .reader-toc {
+    display: none;
+  }
+}
+
+/* The text column: quiet, literary, generous measure (brief §6/§7).
+   Centered so the measure reads as a deliberate column, not text stranded
+   flush-left with the rest of a wide pane left dead. */
 .reader-body {
   font-family: var(--font-reading);
   font-size: 1.0625rem;
   line-height: 1.65;
   max-width: var(--reader-measure);
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin-inline: auto;
 }
 
 .reader-body h1,
@@ -486,6 +554,25 @@
   border-radius: var(--radius);
   overflow-x: auto;
   box-shadow: var(--shadow-hard-sm);
+}
+
+/* --ink/--paper swap wholesale in dark mode, which would turn this into a
+   light block floating on an already-dark reading page. Pin it to the
+   recessed dark surface instead, so it stays a dark panel with light text —
+   the same visual role it plays in light mode — rather than inverting. */
+@media (prefers-color-scheme: dark) {
+  .reader-body pre {
+    background: var(--paper-deep);
+    color: var(--ink);
+  }
+}
+:root[data-theme="dark"] .reader-body pre {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+:root[data-theme="light"] .reader-body pre {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .reader-body pre code {
@@ -552,6 +639,9 @@ a.ref-unresolved {
 
 .backlinks {
   margin-top: auto;
+  max-width: var(--reader-measure);
+  width: 100%;
+  margin-inline: auto;
   border-top: var(--border);
   padding-top: var(--space-2);
 }
@@ -608,6 +698,29 @@ a.ref-unresolved {
 .backlinks-empty {
   color: var(--ink-soft);
   padding: var(--space-2);
+}
+
+/* Outbound "Links to" list (brief 03 §5) sits beside "Referenced by", sharing
+   its list/row styling so the two read as one panel, not two competing ones. */
+.backlinks-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.backlinks-group-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: var(--space-1) var(--space-2);
+}
+
+@container (max-width: 720px) {
+  .backlinks-groups {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Viewers -------------------------------------------------------------------- */
@@ -689,7 +802,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -840,9 +953,9 @@ a.ref-unresolved {
    ========================================================================== */
 
 /* --- Memory dot states (menu bar) --------------------------------------- */
-.memory-dot-green { background: var(--accent-wfdinner); }
-.memory-dot-amber { background: var(--accent-home); }
-.memory-dot-red { background: var(--accent-cookery-books); }
+.memory-dot-green { --dot-fill: var(--accent-wfdinner); }
+.memory-dot-amber { --dot-fill: var(--accent-home); }
+.memory-dot-red { --dot-fill: var(--accent-cookery-books); }
 
 /* --- Shared tabs -------------------------------------------------------- */
 .tabs {
@@ -1216,6 +1329,7 @@ a.ref-unresolved {
 .gauge-name {
   font-weight: 700;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1345,6 +1459,7 @@ a.ref-unresolved {
 
 .activity-name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1437,18 +1552,35 @@ a.ref-unresolved {
   border-bottom: 1px solid var(--ink-faint);
 }
 
+/* No nested scrollbar: the hero crops with a fade and an explicit
+   "read in full", so the space's most important document is never cut
+   off mid-sentence with no way to tell there was more. */
 .space-hero {
-  max-height: 320px;
-  overflow-y: auto;
+  display: grid;
+  gap: var(--space-3);
 }
 
-.space-hero .reader-body {
+.space-hero-content.is-cropped {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+}
+
+.space-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Inside a dashboard panel the measure is the panel, not a reading column —
+   don't inherit the Reader's centred gutters (they'd strand the text). */
+.space-hero .reader-body,
+.space-hero .frontmatter-card {
   font-size: 1rem;
+  max-width: none;
+  margin-inline: 0;
 }
 
-.space-hero-open {
-  margin-top: var(--space-3);
-}
 
 .space-empty {
   color: var(--ink-soft);
@@ -1466,6 +1598,10 @@ a.ref-unresolved {
 .space-filelist {
   list-style: none;
   display: grid;
+  /* Without an explicit column, the implicit track auto-sizes to its
+     content's intrinsic width, so a long filename grows the whole list
+     (and its row) past the panel instead of being truncated inside it. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
 }
 
@@ -1474,6 +1610,7 @@ a.ref-unresolved {
   align-items: center;
   gap: var(--space-2);
   width: 100%;
+  min-width: 0;
   text-align: left;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius);
@@ -1483,6 +1620,7 @@ a.ref-unresolved {
 
 .space-filename {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1691,7 +1829,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 110;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1755,9 +1893,29 @@ a.ref-unresolved {
   height: 100%;
   display: grid;
   grid-template-columns: auto 1fr;
+  /* A definite row size (not the default content-based "auto") so the
+     100%-height sidebar and main column can actually stretch/shrink to fit
+     and scroll internally, instead of growing to content and being clipped
+     by the page's overflow: hidden. */
+  grid-template-rows: minmax(0, 1fr);
   background-color: var(--paper);
   /* Paper grain sits behind everything; opaque panels cover it, and the
      transparent pane bodies let it show through under the content. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Dark mode: same reasoning as the .paper-grain overlay in global.css — a
+   dark tint reads as dirt on a dark ground, so swap to a light tint at the
+   same alpha this file already used, keeping the two grains consistent. */
+@media (prefers-color-scheme: dark) {
+  .shell {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] .shell {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.94 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] .shell {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.094 0 0 0 0 0.078 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
@@ -1766,6 +1924,7 @@ a.ref-unresolved {
 .sidebar {
   width: var(--sidebar-w);
   height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -1810,7 +1969,8 @@ a.ref-unresolved {
   font-size: var(--text-small);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--ink-faint);
+  /* --ink-faint fell below 4.5:1 on the sidebar ground at this size. */
+  color: var(--ink-soft);
   padding: var(--space-3) var(--space-3) var(--space-1);
 }
 .is-collapsed .sidebar-heading {
@@ -1963,14 +2123,17 @@ a.ref-unresolved {
   margin-left: var(--space-2);
 }
 
-/* memory dot (shared with the Memory Monitor states below) */
+/* memory dot (shared with the Memory Monitor states above). The fill comes
+   from --dot-fill, set by the .memory-dot-* state classes — a plain
+   `background` here would win on source order and pin the dot to one colour
+   no matter what the state is. */
 .memory-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   border: var(--border);
   display: inline-block;
-  background: var(--accent-wfdinner);
+  background: var(--dot-fill, var(--ink-faint));
 }
 
 /* --- Content, panes, tab strip ------------------------------------------- */
@@ -1992,23 +2155,33 @@ a.ref-unresolved {
   border-right: var(--border);
 }
 
+/* The strip scrolls; the overflow button is pinned outside it so there is
+   always a way to reach a tab that has scrolled out of sight. */
+.tabstrip-row {
+  display: flex;
+  align-items: stretch;
+  height: var(--tabstrip-h);
+  min-width: 0;
+  background: var(--paper-deep);
+  border-bottom: var(--border);
+}
+
+.pane.is-active-pane .tabstrip-row {
+  box-shadow: inset 0 3px 0 var(--accent-job-search);
+}
+
 .tabstrip {
   display: flex;
   align-items: stretch;
   gap: 2px;
-  height: var(--tabstrip-h);
+  flex: 1;
+  min-width: 0;
   padding: var(--space-1) var(--space-2) 0;
-  background: var(--paper-deep);
-  border-bottom: var(--border);
   overflow-x: auto;
   scrollbar-width: none;
 }
 .tabstrip::-webkit-scrollbar {
   display: none;
-}
-
-.pane.is-active-pane .tabstrip {
-  box-shadow: inset 0 3px 0 var(--accent-job-search);
 }
 
 .doctab {
@@ -2021,12 +2194,20 @@ a.ref-unresolved {
   border-radius: var(--radius) var(--radius) 0 0;
   background: var(--paper-deep);
   max-width: 220px;
-  min-width: 0;
+  /* Keep a legible label rather than crushing every tab to one letter —
+     the strip scrolls (and the overflow menu lists them all) instead. */
+  min-width: 116px;
+  flex-shrink: 0;
   margin-bottom: -2px;
 }
 
 .doctab.is-active {
   background: var(--paper);
+}
+
+/* A preview reads as provisional: italic title, as in an editor. */
+.doctab.is-transient .doctab-title {
+  font-style: italic;
 }
 
 .doctab-open {
@@ -2051,7 +2232,8 @@ a.ref-unresolved {
 }
 
 .doctab-split,
-.doctab-close {
+.doctab-close,
+.doctab-pin {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
@@ -2062,10 +2244,13 @@ a.ref-unresolved {
 }
 .doctab:hover .doctab-split,
 .doctab:hover .doctab-close,
+.doctab:hover .doctab-pin,
+.doctab:focus-within .doctab-pin,
 .doctab.is-active .doctab-close {
   opacity: 1;
 }
-.doctab-split:hover {
+.doctab-split:hover,
+.doctab-pin:hover {
   background: var(--ink);
   color: var(--paper);
 }
@@ -2074,10 +2259,131 @@ a.ref-unresolved {
   color: var(--paper);
 }
 
+/* --- Tab overflow menu --------------------------------------------------- */
+
+.tabmenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-left: 1px solid var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.tabmenu-btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  min-height: 26px;
+  white-space: nowrap;
+}
+.tabmenu-btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.tabmenu-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 60;
+  min-width: 240px;
+  max-width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 1px;
+  padding: var(--space-1);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard);
+}
+
+.tabmenu-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tabmenu-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 32px;
+  color: var(--ink-soft);
+}
+.tabmenu-open:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+.tabmenu-open.is-active {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.tabmenu-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-small);
+}
+
+.tabmenu-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.tabmenu-close {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  color: var(--ink-faint);
+}
+.tabmenu-close:hover {
+  background: var(--accent-cookery-books);
+  color: var(--paper);
+}
+
+.tabmenu-action {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-align: left;
+  padding: var(--space-2);
+  min-height: 32px;
+  border-top: 1px solid var(--ink-faint);
+  margin-top: var(--space-1);
+  border-radius: var(--radius);
+}
+.tabmenu-action:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.tabmenu-action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .pane-body {
   min-height: 0;
   overflow: auto;
   padding: var(--space-5);
+  /* Reader's contents rail queries pane width, not viewport width, since a
+     split pane can be narrow on a wide window (brief 03 §2). */
+  container-type: inline-size;
 }
 
 /* --- Narrow screens: sidebar collapses to icons, split stacks ------------ */
@@ -2118,4 +2424,934 @@ a.ref-unresolved {
   .memory-head {
     flex-wrap: wrap;
   }
+}
+
+/* ==========================================================================
+   Today — the cross-space triage surface
+   ========================================================================== */
+
+.today {
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+  max-width: 78ch;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.today-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border);
+}
+
+.today-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+.today-greeting {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.today-since {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  max-width: 44ch;
+  text-align: right;
+}
+
+.today-clear {
+  font-family: var(--font-reading);
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  background: var(--paper-deep);
+}
+
+/* Sections are grouped by hairline rules, not boxes — the urgent one is the
+   only thing here that earns a full border, so the eye lands on it first. */
+.today-section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.today-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.today-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 999px;
+  padding: 0 var(--space-2);
+  min-width: 20px;
+  text-align: center;
+}
+
+.today-section-urgent {
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-4);
+  background: var(--paper);
+}
+.today-section-urgent .today-section-title {
+  color: var(--accent-cookery-books);
+  border-bottom-color: var(--accent-cookery-books);
+}
+.today-section-urgent .today-count {
+  background: var(--accent-cookery-books);
+}
+
+/* --- Task rows ----------------------------------------------------------- */
+
+.today-tasks {
+  list-style: none;
+  display: grid;
+  gap: 1px;
+}
+
+.today-task {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.today-task:hover {
+  background: var(--paper-deep);
+}
+
+.today-task-check {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.today-task-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.today-task-content {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.today-task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.today-task-space {
+  color: var(--ink-soft);
+}
+
+.today-tasks-quiet .today-task-content {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+/* --- Memory breaches ------------------------------------------------------ */
+
+.today-breaches,
+.today-changed,
+.today-runs {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.today-breach {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+.today-breach:hover {
+  background: var(--paper-deep);
+}
+
+.today-breach-name {
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.today-breach-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Scheduled runs ------------------------------------------------------- */
+
+.today-run {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+
+.today-run-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+/* --- Changed, grouped by space -------------------------------------------- */
+
+.today-changed-space {
+  padding: var(--space-2) 0;
+}
+
+.today-changed-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+}
+.today-changed-head:not(:disabled):hover {
+  background: var(--paper-deep);
+}
+.today-changed-head:disabled {
+  cursor: default;
+}
+
+.today-changed-label {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.today-changed-files {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  padding-left: var(--space-5);
+  margin-top: 2px;
+}
+
+.today-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-height: 30px;
+}
+.today-file:hover {
+  background: var(--paper-deep);
+}
+
+.today-file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-small);
+}
+
+.today-changed-more {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  padding: var(--space-1) var(--space-2);
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.today-setup {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+.today-setup code {
+  background: var(--paper);
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius);
+  padding: 0 var(--space-1);
+}
+
+.today-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--ink-faint);
+}
+
+/* Today sits apart from the space list it summarises. */
+.nav-list-today {
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+@media (max-width: 720px) {
+  .today-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .today-since {
+    text-align: left;
+  }
+}
+
+/* ==========================================================================
+   Memory — structure, not just size
+   ========================================================================== */
+
+.memory {
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+}
+
+/* --- Still open, across the workspace ------------------------------------ */
+
+.mem-open-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+}
+
+.mem-open-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+.mem-open-row:hover { background: var(--paper-deep); }
+
+.mem-open-space {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+  min-width: 11ch;
+}
+
+.mem-open-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- Composition --------------------------------------------------------- */
+
+.mem-comp {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.mem-comp-bar {
+  display: flex;
+  height: 8px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper-deep);
+}
+
+.mem-comp-seg { display: block; }
+
+/* Kind colours are their own scale, deliberately not the space accents —
+   identity and status must not share a palette. */
+.mem-comp-fact     { background: var(--ink-soft); }
+.mem-comp-decision { background: var(--accent-finances); }
+.mem-comp-open     { background: var(--accent-home); }
+.mem-comp-note     { background: var(--ink-faint); }
+
+.mem-comp-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+.mem-comp-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.mem-comp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.mem-trim {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border-left: 3px solid var(--accent-home);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* The gauge is an article now, with its own head button. */
+.gauge-open {
+  width: 100%;
+  text-align: left;
+  border-radius: var(--radius);
+}
+.gauge-open:hover { background: var(--paper-deep); }
+
+/* ==========================================================================
+   Search window — the persistent counterpart to the ⌘K palette.
+   Every value is a token, so this inherits any theme change for free.
+   ========================================================================== */
+
+.searchw {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.searchw-head {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  border-bottom: var(--border);
+  background: var(--paper-deep);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.searchw-input {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.searchw-input::placeholder { color: var(--ink-faint); }
+
+.searchw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.searchw-count {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.searchw-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
+.searchw-group { margin-bottom: var(--space-5); }
+
+.searchw-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-2);
+}
+
+.searchw-group-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.searchw-sub {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* A result is a row plus a send-to-split affordance, so opening something to
+   read never costs you the result set you found it in. */
+.sr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  border-radius: var(--radius);
+}
+.sr-row:hover,
+.sr-row.is-active { background: var(--paper-deep); }
+
+.sr-open {
+  display: grid;
+  grid-template-columns: 3px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: stretch;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.sr-rule { border-radius: 2px; }
+
+.sr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sr-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-snippet {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sr-snippet mark {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid currentColor;
+}
+
+.sr-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-split {
+  padding: 0 var(--space-3);
+  color: var(--ink-faint);
+  opacity: 0;
+  flex-shrink: 0;
+}
+.sr-row:hover .sr-split,
+.sr-row.is-active .sr-split,
+.sr-split:focus-visible { opacity: 1; }
+.sr-split:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Timeline — one spine of days, past above and future below, today anchored.
+   Colour means space (as everywhere); event type is carried by mark shape.
+   ========================================================================== */
+
+.timeline {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.timeline-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: var(--border);
+  background: var(--paper-deep);
+}
+
+.timeline-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
+.tl-day {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  align-items: start;
+}
+
+/* The past recedes; what is ahead reads at full weight. */
+.tl-day.is-past .tl-entry-name { color: var(--ink-soft); }
+
+.tl-daylabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0;
+  padding-top: var(--space-1);
+  position: sticky;
+  top: 0;
+}
+
+.tl-daycount {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+/* Today is the anchor, so it gets the only rule on the spine. */
+.tl-day-today {
+  border-top: var(--border);
+  border-bottom: var(--border);
+  padding: var(--space-3) 0;
+  margin: var(--space-2) 0;
+}
+.tl-day-today .tl-daylabel {
+  color: var(--ink);
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+.tl-day-today.is-past .tl-entry-name { color: var(--ink); }
+
+.tl-quiet {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-1) 0 0;
+}
+
+.tl-gap {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-2) 0 var(--space-2) 132px;
+  font-style: italic;
+}
+
+.tl-entries {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tl-entry {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  text-align: left;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.tl-entry:hover { background: var(--paper-deep); }
+.tl-entry:disabled { cursor: default; }
+.tl-entry:disabled:hover { background: transparent; }
+
+.tl-entry-name {
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tl-entry-meta,
+.tl-entry-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.tl-entry-run .tl-entry-name { font-weight: 600; }
+.tl-entry-task.is-overdue .tl-entry-time { color: var(--accent-cookery-books); }
+
+/* The three marks. Shape carries type so colour stays free to mean space. */
+.tl-mark {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  justify-self: center;
+}
+.tl-mark-change { background: var(--mark, var(--ink-faint)); }
+.tl-mark-run {
+  border: 2px solid var(--mark, var(--ink-faint));
+  border-radius: 50%;
+}
+.tl-mark-task {
+  border: 2px solid var(--ink-soft);
+  border-radius: 1px;
+}
+
+.tl-more {
+  align-self: start;
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  padding: var(--space-1) var(--space-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.tl-more:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Connections — seams between spaces, load-bearing docs, forgotten ones.
+   ========================================================================== */
+
+.cx {
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-5);
+}
+
+.cx-section { margin-bottom: var(--space-6); }
+
+.cx-note {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-3);
+  max-width: 62ch;
+}
+
+.cx-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* A seam is a claim ("these two spaces touch, 3 times") with its evidence
+   folded away underneath — the count is the finding, the links are the proof. */
+.cx-seams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cx-seam {
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.cx-seam-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-3);
+}
+
+.cx-seam-name {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cx-seam-join { color: var(--ink-faint); }
+
+.cx-caret {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: var(--text-small);
+}
+
+/* Bullets are opted out per list rather than globally: Reader content is
+   markdown and its lists must keep theirs. */
+.cx-links {
+  border-top: var(--border);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+}
+
+.cx-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-link:hover { background: var(--paper-deep); }
+
+.cx-link-pair {
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-link-snippet {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cx-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-row:hover { background: var(--paper-deep); }
+
+.cx-row-name {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cx-row-meta,
+.cx-row-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.cx-table {
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.cx-tr {
+  display: grid;
+  grid-template-columns: minmax(140px, 2fr) repeat(5, minmax(56px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+.cx-tr + .cx-tr { border-top: 1px solid var(--paper-deep); }
+
+.cx-th {
+  background: var(--paper-deep);
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: var(--border);
+}
+
+.cx-td-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

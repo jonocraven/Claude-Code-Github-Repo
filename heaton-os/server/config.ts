@@ -54,3 +54,21 @@ export const IGNORE_NAMES = new Set([
   "__pycache__",
   "node_modules",
 ]);
+
+/**
+ * Workspace convention: a name ending in "ignore)" — as in
+ * "State (machine memory — ignore)" — is machine scratch space and is hidden
+ * everywhere (tree, search, recents, activity, watcher). This lets Jono
+ * retire something from the UI by renaming it, with no code change.
+ *
+ * The optional extension matters: this started life as a folder-only rule, so
+ * it anchored at end-of-string and silently did nothing for `Draft (ignore).md`
+ * — the case a person is most likely to reach for, since retiring one note is
+ * commoner than retiring a whole folder.
+ */
+const IGNORE_SUFFIX = /ignore\)(\.[a-z0-9]+)?\s*$/i;
+
+/** The single ignore test — every walker and the watcher must use this. */
+export function isIgnored(name: string): boolean {
+  return IGNORE_NAMES.has(name) || IGNORE_SUFFIX.test(name);
+}

@@ -32,6 +32,12 @@ export interface FrontMatterField {
   html: string;
 }
 
+export interface Heading {
+  id: string;
+  text: string;
+  depth: number;
+}
+
 export interface FileResponse {
   kind: "markdown" | "csv" | "image" | "pdf" | "html" | "other";
   path: string;
@@ -41,6 +47,7 @@ export interface FileResponse {
   modified: string;
   title?: string;
   frontmatter?: FrontMatterField[];
+  headings?: Heading[];
   html?: string;
   text?: string;
   source?: string; // raw markdown, for the editor
@@ -88,10 +95,22 @@ export interface SearchHit {
   space: string | null;
   snippet: string;
   score: number;
+  modified?: string;
+}
+
+/** A filename match — the only way non-markdown files are findable. */
+export interface FileHit {
+  path: string;
+  name: string;
+  space: string | null;
+  ext: string;
 }
 
 export interface SearchResponse {
   keyword: SearchHit[];
+  /** Matches before the limit, so the UI can say "12 of 47". */
+  keywordTotal: number;
+  files: FileHit[];
   semantic: SearchHit[];
   semanticStatus: "building" | "ready" | "unavailable";
 }
@@ -120,9 +139,14 @@ export async function fetchBacklinks(path: string): Promise<Backlink[]> {
   return data.backlinks;
 }
 
-export function fetchSearch(q: string, space: string | null): Promise<SearchResponse> {
+export function fetchSearch(
+  q: string,
+  space: string | null,
+  limit?: number
+): Promise<SearchResponse> {
   const params = new URLSearchParams({ q });
   if (space) params.set("space", space);
+  if (limit) params.set("limit", String(limit));
   return getJson(`/api/search?${params}`);
 }
 
@@ -136,6 +160,22 @@ export function postAction(action: "reveal" | "open", path: string): Promise<unk
 
 export type MemoryStatus = "green" | "amber" | "red";
 
+export type EntryKind = "fact" | "decision" | "open" | "note";
+
+export interface MemoryEntry {
+  kind: EntryKind;
+  text: string;
+  section: string | null;
+  line: number;
+  depth: number;
+}
+
+export interface MemoryStructure {
+  entries: MemoryEntry[];
+  counts: Record<EntryKind, number>;
+  sections: { name: string; count: number }[];
+}
+
 export interface MemoryGauge {
   path: string;
   label: string;
@@ -146,6 +186,7 @@ export interface MemoryGauge {
   linePct: number;
   wordPct: number;
   status: MemoryStatus;
+  structure: MemoryStructure;
 }
 
 export interface MemoryHealth {
@@ -222,6 +263,82 @@ export function completeTask(id: string): Promise<Response> {
   return fetch(`/api/todoist/complete?id=${encodeURIComponent(id)}`, {
     method: "POST",
   });
+}
+
+// --- Connections: where the silos touch ----------------------------------
+
+export interface CrossLink {
+  source: string;
+  sourceTitle: string;
+  sourceSpace: string;
+  target: string;
+  targetTitle: string;
+  targetSpace: string;
+  snippet: string;
+}
+
+export interface Orphan {
+  path: string;
+  title: string;
+  space: string | null;
+  modified: string;
+}
+
+export interface Hub {
+  path: string;
+  title: string;
+  space: string | null;
+  inbound: number;
+  outbound: number;
+}
+
+export interface SpaceConnections {
+  space: string;
+  docs: number;
+  internalLinks: number;
+  outboundCross: number;
+  inboundCross: number;
+  orphans: number;
+}
+
+export interface Connections {
+  crossLinks: CrossLink[];
+  orphans: Orphan[];
+  hubs: Hub[];
+  spaces: SpaceConnections[];
+}
+
+export function fetchConnections(): Promise<Connections> {
+  return getJson("/api/connections");
+}
+
+// --- Today: the cross-space triage surface -------------------------------
+
+export interface ChangedGroup {
+  id: string | null;
+  label: string;
+  files: ActivityFile[];
+  total: number;
+}
+
+export interface TodayResponse {
+  now: string;
+  since: string;
+  sinceWidened: boolean;
+  tasksConfigured: boolean;
+  overdue: Task[];
+  dueToday: Task[];
+  upcoming: Task[];
+  waiting: Task[];
+  runsToday: ScheduledEvent[];
+  memoryBreaches: MemoryGauge[];
+  changed: ChangedGroup[];
+  changedTotal: number;
+}
+
+export function fetchToday(since: string | null): Promise<TodayResponse> {
+  const params = since ? `?since=${encodeURIComponent(since)}` : "";
+  return getJson(`/api/today${params}`);
 }
 
 /** DD-MM-YYYY — UK conventions throughout (brief §7). */

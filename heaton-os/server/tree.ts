@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { IGNORE_NAMES } from "./config.js";
+import { isIgnored } from "./config.js";
 
 export interface TreeFile {
   type: "file";
@@ -40,7 +40,7 @@ export async function buildTree(root: string, dir = root): Promise<TreeDir> {
   };
 
   for (const entry of entries) {
-    if (IGNORE_NAMES.has(entry.name)) continue;
+    if (isIgnored(entry.name)) continue;
     const abs = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {

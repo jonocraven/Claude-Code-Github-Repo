@@ -54,7 +54,7 @@ function RecipeGrid({ path }: { path: string }) {
       .catch(() => setRows([]));
   }, [path]);
 
-  if (rows === null) return <p className="space-empty">Loading recipes…</p>;
+  if (rows === null) return <p className="space-empty" role="status">Loading recipes…</p>;
   if (rows.length === 0) return <p className="space-empty">No recipe file found.</p>;
 
   const col = (name: string) => header.findIndex((h) => h.toLowerCase() === name);
@@ -180,12 +180,10 @@ function FinanceRefresh() {
 
 function PanelBody({ panel, tree }: { panel: Panel; tree: TreeDir }) {
   switch (panel.kind) {
-    case "files": {
-      const files = filesIn(tree, panel.folder, panel.exts).filter(
-        (f) => !panel.hide?.some((h) => f.path.includes(h))
-      );
-      return <FileChips files={files} />;
-    }
+    case "files":
+      // Machine-scratch folders are excluded server-side now (config.isIgnored),
+      // so they never reach the tree this reads from.
+      return <FileChips files={filesIn(tree, panel.folder, panel.exts)} />;
     case "csv":
       return <RecipeGrid path={panel.path} />;
     case "artwork":
@@ -203,16 +201,35 @@ function PanelBody({ panel, tree }: { panel: Panel; tree: TreeDir }) {
   }
 }
 
+/** Collapsed height of the memory hero, in px — the fade starts here. */
+const HERO_COLLAPSED_PX = 340;
+
 function MemoryHero({ folder }: { folder: string }) {
   const [doc, setDoc] = useState<FileResponse | null>(null);
   const [missing, setMissing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  // Only offer "read in full" when there is actually more to read — measured,
+  // so a short MEMORY.md gets no crop, no fade and no pointless control.
+  const [overflows, setOverflows] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setExpanded(false);
     fetchFile(`${folder}/MEMORY.md`)
       .then(setDoc)
       .catch(() => setMissing(true));
   }, [folder]);
+
+  useEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const measure = () => setOverflows(el.scrollHeight > HERO_COLLAPSED_PX + 8);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [doc]);
 
   useEffect(() => {
     const el = ref.current;
@@ -229,30 +246,50 @@ function MemoryHero({ folder }: { folder: string }) {
   });
 
   if (missing) return <p className="space-empty">No MEMORY.md in this space.</p>;
-  if (!doc) return <p className="space-empty">Loading space memory…</p>;
+  if (!doc) return <p className="space-empty" role="status">Loading space memory…</p>;
+
+  const cropped = overflows && !expanded;
 
   return (
     <div className="space-hero" ref={ref}>
-      {doc.frontmatter && doc.frontmatter.length > 0 && (
-        <aside className="frontmatter-card">
-          <dl>
-            {doc.frontmatter.map((f) => (
-              <div key={f.label} className="frontmatter-row">
-                <dt>{f.label}</dt>
-                <dd dangerouslySetInnerHTML={{ __html: f.html }} />
-              </div>
-            ))}
-          </dl>
-        </aside>
-      )}
-      <div className="reader-body" dangerouslySetInnerHTML={{ __html: doc.html ?? "" }} />
-      <button
-        type="button"
-        className="tree-sort-btn space-hero-open"
-        onClick={() => openFile(`${folder}/MEMORY.md`)}
+      <div
+        className={`space-hero-content${cropped ? " is-cropped" : ""}`}
+        ref={inner}
+        style={cropped ? { maxHeight: HERO_COLLAPSED_PX } : undefined}
       >
-        Open in Reader
-      </button>
+        {doc.frontmatter && doc.frontmatter.length > 0 && (
+          <aside className="frontmatter-card">
+            <dl>
+              {doc.frontmatter.map((f) => (
+                <div key={f.label} className="frontmatter-row">
+                  <dt>{f.label}</dt>
+                  <dd dangerouslySetInnerHTML={{ __html: f.html }} />
+                </div>
+              ))}
+            </dl>
+          </aside>
+        )}
+        <div className="reader-body" dangerouslySetInnerHTML={{ __html: doc.html ?? "" }} />
+      </div>
+      <div className="space-hero-actions">
+        {overflows && (
+          <button
+            type="button"
+            className="tree-sort-btn"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((e) => !e)}
+          >
+            {expanded ? "Show less" : "Read in full"}
+          </button>
+        )}
+        <button
+          type="button"
+          className="tree-sort-btn"
+          onClick={() => openFile(`${folder}/MEMORY.md`)}
+        >
+          Open in Reader
+        </button>
+      </div>
     </div>
   );
 }
@@ -273,7 +310,7 @@ function SectionTasks({ spaceId }: { spaceId: string }) {
   if (!configured) {
     return <p className="space-empty">Connect Todoist to see this section's tasks.</p>;
   }
-  if (!tasks) return <p className="space-empty">Loading tasks…</p>;
+  if (!tasks) return <p className="space-empty" role="status">Loading tasks…</p>;
   return <TaskList tasks={tasks} emptyLabel="No open tasks in this section." />;
 }
 
@@ -353,7 +390,7 @@ export function SpaceWindow({
               {tree ? (
                 <PanelBody panel={panel} tree={tree} />
               ) : (
-                <p className="space-empty">Loading…</p>
+                <p className="space-empty" role="status">Loading…</p>
               )}
             </Panel>
           ))}

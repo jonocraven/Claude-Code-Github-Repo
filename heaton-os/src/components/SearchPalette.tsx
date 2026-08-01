@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchSearch, type SearchResponse } from "../api";
 import { APPS, type AppDef } from "../apps";
 import { AppIcon } from "../icons";
-import { openFile, useTabs } from "../store/tabs";
+import { openFile, openSearch, useTabs } from "../store/tabs";
+import { useRecent, formatAge } from "../store/recent";
 
 const SPACES = APPS.filter((a) => a.kind === "space");
 
@@ -25,6 +26,7 @@ interface Entry {
 
 export function SearchPalette({ onClose }: { onClose: () => void }) {
   const openApp = useTabs((s) => s.openApp);
+  const recent = useRecent((s) => s.entries);
   const [query, setQuery] = useState("");
   const [space, setSpace] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResponse | null>(null);
@@ -62,11 +64,36 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
         onClose();
       },
     }));
+
+    // Add recent entries when query is empty
+    if (!query.trim() && recent.length > 0) {
+      const recentTopEight = recent.slice(0, 8);
+      for (const entry of recentTopEight) {
+        list.push({
+          key: `recent:${entry.path}`,
+          run: () => {
+            openFile(entry.path);
+            onClose();
+          },
+        });
+      }
+    }
+
     for (const hit of results?.keyword ?? []) {
       list.push({
         key: `kw:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          // A search hit lands at the top, not a remembered position (brief 03 §3).
+          openFile(hit.path, { restore: false });
+          onClose();
+        },
+      });
+    }
+    for (const hit of results?.files ?? []) {
+      list.push({
+        key: `file:${hit.path}`,
+        run: () => {
+          openFile(hit.path, { restore: false });
           onClose();
         },
       });
@@ -75,13 +102,24 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
       list.push({
         key: `sem:${hit.path}`,
         run: () => {
-          openFile(hit.path);
+          openFile(hit.path, { restore: false });
+          onClose();
+        },
+      });
+    }
+    // The escape hatch out of the palette's twelve-hit ceiling. Last in the
+    // list, so ↓ walks past every real hit before offering it.
+    if (query.trim()) {
+      list.push({
+        key: "all",
+        run: () => {
+          openSearch(query.trim(), space);
           onClose();
         },
       });
     }
     return list;
-  }, [appHits, results, openApp, onClose]);
+  }, [appHits, query, space, recent, results, openApp, onClose]);
 
   useEffect(() => setActive(0), [query, space, results?.keyword.length]);
 
@@ -98,11 +136,17 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // Walks the same order `entries` was built in, so the keyboard highlight and
+  // the rendered rows agree. `key` is returned separately rather than spread:
+  // React 19 warns when a key arrives via {...props}, and the warning is right
+  // — a spread key is invisible at the call site.
   let cursor = -1;
   const rowClass = (key: string) => {
     cursor += 1;
-    const isActive = cursor === active;
-    return { className: `palette-row${isActive ? " is-active" : ""}`, key };
+    return {
+      key,
+      props: { className: `palette-row${cursor === active ? " is-active" : ""}` },
+    };
   };
 
   return (
@@ -160,7 +204,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     style={{ color: `var(${a.accentVar})` }}
                     onClick={() => {
                       openApp(a.id);
@@ -176,6 +220,30 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
             </section>
           )}
 
+          {!query.trim() && recent.length > 0 && (
+            <section>
+              <h3 className="palette-section">Recent</h3>
+              {recent.slice(0, 8).map((entry) => {
+                const rc = rowClass(`recent:${entry.path}`);
+                return (
+                  <button
+                    type="button"
+                    key={rc.key} {...rc.props}
+                    onClick={() => {
+                      openFile(entry.path);
+                      onClose();
+                    }}
+                  >
+                    <span className="palette-doc">
+                      <span className="palette-title">{entry.title}</span>
+                    </span>
+                    <span className="palette-hint">{formatAge(entry.at)}</span>
+                  </button>
+                );
+              })}
+            </section>
+          )}
+
           {results && results.keyword.length > 0 && (
             <section>
               <h3 className="palette-section">Documents</h3>
@@ -184,9 +252,9 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >
@@ -206,6 +274,31 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
             </section>
           )}
 
+          {results && results.files.length > 0 && (
+            <section>
+              <h3 className="palette-section">Files by name</h3>
+              {results.files.map((hit) => {
+                const rc = rowClass(`file:${hit.path}`);
+                return (
+                  <button
+                    type="button"
+                    key={rc.key} {...rc.props}
+                    onClick={() => {
+                      openFile(hit.path, { restore: false });
+                      onClose();
+                    }}
+                  >
+                    <span className="palette-doc">
+                      <span className="palette-title">{hit.name}</span>
+                      {hit.space && <span className="palette-space">{hit.space}</span>}
+                    </span>
+                    <span className="palette-hint">{hit.ext || "file"}</span>
+                  </button>
+                );
+              })}
+            </section>
+          )}
+
           {results && results.semantic.length > 0 && (
             <section>
               <h3 className="palette-section palette-section-related">Related</h3>
@@ -214,9 +307,9 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
                 return (
                   <button
                     type="button"
-                    {...rc}
+                    key={rc.key} {...rc.props}
                     onClick={() => {
-                      openFile(hit.path);
+                      openFile(hit.path, { restore: false });
                       onClose();
                     }}
                   >
@@ -239,10 +332,29 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
           {query.trim() &&
             results &&
             results.keyword.length === 0 &&
+            results.files.length === 0 &&
             results.semantic.length === 0 &&
             appHits.length === 0 && (
               <p className="palette-status">Nothing found for “{query}”.</p>
             )}
+
+          {query.trim() && (
+            <button type="button" {...rowClass("all").props} onClick={() => {
+              openSearch(query.trim(), space);
+              onClose();
+            }}>
+              <span className="palette-doc">
+                <span className="palette-title">
+                  See all results for “{query.trim()}”
+                </span>
+              </span>
+              <span className="palette-hint">
+                {results && results.keywordTotal > results.keyword.length
+                  ? `${results.keywordTotal} matches`
+                  : "in Search"}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>

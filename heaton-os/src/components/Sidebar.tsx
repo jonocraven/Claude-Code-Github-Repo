@@ -2,9 +2,14 @@ import { APPS } from "../apps";
 import { AppIcon } from "../icons";
 import { useTabs } from "../store/tabs";
 
-// System apps that appear as nav items (Reader/Viewer/Welcome are tab-only;
-// Search is the palette, handled specially).
-const SYSTEM_NAV = ["files", "tasks", "calendar", "memory", "activity"];
+// System apps that appear as nav items (Reader/Viewer/Welcome are tab-only).
+// Search sits here now that it is a window; the row above the spaces is the
+// ⌘K palette, which is a different tool for a different moment — see below.
+const SYSTEM_NAV = ["files", "search", "tasks", "timeline", "memory", "connections"];
+
+// Today is the landing surface, so it sits above the spaces rather than
+// among the system tools it summarises.
+const TODAY_ID = "today";
 
 export function Sidebar({ onSearch }: { onSearch: () => void }) {
   const tabs = useTabs((s) => s.tabs);
@@ -23,6 +28,7 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
 
   const spaces = APPS.filter((a) => a.kind === "space");
   const system = SYSTEM_NAV.map((id) => APPS.find((a) => a.id === id)!).filter(Boolean);
+  const todayApp = APPS.find((a) => a.id === TODAY_ID)!;
 
   const navItem = (app: (typeof APPS)[number]) => (
     <li key={app.id}>
@@ -49,18 +55,26 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
         </span>
       </div>
 
+      {/*
+        Named for what it is rather than "Search", now that Search is also a
+        window in the System list. Two rows with the same word on them would
+        be a coin toss; these are genuinely different tools — this one is for
+        when you know what you want and want to be gone.
+      */}
       <button
         type="button"
         className="nav-item nav-search"
         onClick={onSearch}
-        title={collapsed ? "Search (⌘K)" : undefined}
+        title={collapsed ? "Jump to a document or app (⌘K)" : undefined}
       >
         <span className="nav-icon">
           <AppIcon appId="search" size={22} />
         </span>
-        <span className="nav-label">Search</span>
+        <span className="nav-label">Jump to…</span>
         <span className="nav-kbd" aria-hidden="true">⌘K</span>
       </button>
+
+      <ul className="nav-list nav-list-today">{navItem(todayApp)}</ul>
 
       <p className="sidebar-heading">Spaces</p>
       <ul className="nav-list">{spaces.map(navItem)}</ul>

@@ -90,6 +90,15 @@ const ICONS: Record<string, (p: IconProps) => React.JSX.Element> = {
   ),
 
   // --- System apps ---
+  today: (p) => (
+    <Svg {...p}>
+      {/* sun coming up over a horizon — the start of the working day */}
+      <path d="M2.9 17.4h18.2" />
+      <path d="M6.6 17.4a5.4 5.4 0 0 1 10.8 0" />
+      <path d="M12 4.3v2.1M4.7 7.5l1.5 1.5M19.3 7.5l-1.5 1.5" />
+      <path d="M2.9 20.6h4.4M10.2 20.6h11" />
+    </Svg>
+  ),
   files: (p) => (
     <Svg {...p}>
       <path d="M3.6 6.4h5.6l2 2.4h9.2c.5 0 .8.4.8.9v9.1c0 .5-.3.8-.8.8H3.6c-.5 0-.8-.3-.8-.8V7.2c0-.5.3-.8.8-.8Z" />
@@ -131,6 +140,24 @@ const ICONS: Record<string, (p: IconProps) => React.JSX.Element> = {
   activity: (p) => (
     <Svg {...p}>
       <path d="M3 13.2h3.4l2-6.4 3.6 11 2.4-7.4 1.6 3.4H21" />
+    </Svg>
+  ),
+  // Connections: two nodes with a link between them, and a third off to one
+  // side — a graph with a seam in it.
+  connections: (p) => (
+    <Svg {...p}>
+      <circle cx="6" cy="7" r="2.4" />
+      <circle cx="18" cy="12" r="2.4" />
+      <circle cx="7.5" cy="17.5" r="2.4" />
+      <path d="m8.2 8.2 7.6 3.1M15.8 13.4 9.6 16.4" />
+    </Svg>
+  ),
+  // Timeline: a spine with today marked on it — the shape of the window.
+  timeline: (p) => (
+    <Svg {...p}>
+      <path d="M12 3.4v17.2" />
+      <path d="M12 7.2H6.4M12 12h6M12 16.8H7.8" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
     </Svg>
   ),
   welcome: (p) => (

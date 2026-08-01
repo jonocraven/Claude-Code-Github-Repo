@@ -6,7 +6,7 @@
  */
 
 export type Panel =
-  | { kind: "files"; title: string; folder: string; exts?: string[]; hide?: string[] }
+  | { kind: "files"; title: string; folder: string; exts?: string[] }
   | { kind: "csv"; title: string; path: string }
   | { kind: "artwork"; title: string; folder: string }
   | { kind: "cv-lanes"; title: string; base: string }
@@ -36,7 +36,6 @@ export const SPACE_CONFIG: Record<string, SpaceConfig> = {
         title: "Digests",
         folder: "Spaces/Job-Search/Resources/digests",
         exts: ["md"],
-        hide: ["State (machine memory — ignore)"],
       },
       {
         kind: "files",

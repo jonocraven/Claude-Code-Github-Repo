@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { MEMORY_AMBER, MEMORY_CEILINGS, WORKSPACE_ROOT } from "./config.js";
+import { parseMemory, type MemoryStructure } from "./memory-structure.js";
 
 /**
  * Memory-health port (brief §4.6 / Appendix C). Mirrors the thresholds in
@@ -22,6 +23,11 @@ export interface MemoryGauge {
   linePct: number;
   wordPct: number;
   status: MemoryStatus;
+  /**
+   * What the file actually *contains*, not just how big it is. Turns the
+   * monitor from a bathroom scale into something that can say what to trim.
+   */
+  structure: MemoryStructure;
 }
 
 export interface MemoryHealth {
@@ -57,6 +63,7 @@ function gaugeFor(
   const status: MemoryStatus =
     peak > 1 ? "red" : peak >= MEMORY_AMBER ? "amber" : "green";
   return {
+    structure: parseMemory(text),
     path: rel,
     label,
     lines,

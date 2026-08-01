@@ -1,8 +1,29 @@
-import { describe, expect, it } from "vitest";
-import { memoryHealth } from "./memory.js";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-// .env in this workspace points WORKSPACE_ROOT at the fixture, whose memory
-// files are sized to exercise each gauge state.
+/**
+ * Point WORKSPACE_ROOT at the committed fixture before config.ts is imported,
+ * so the suite is reproducible on a clean checkout. It previously relied on a
+ * developer's .env happening to point at the fixture — and .env is gitignored,
+ * so `npm test` failed on a fresh clone. dotenv does not override variables
+ * already present in the environment, so setting it here wins.
+ */
+const FIXTURE = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "fixtures",
+  "sample-workspace"
+);
+
+let memoryHealth: typeof import("./memory.js").memoryHealth;
+
+beforeAll(async () => {
+  process.env.WORKSPACE_ROOT = FIXTURE;
+  vi.resetModules();
+  ({ memoryHealth } = await import("./memory.js"));
+});
+
 describe("memoryHealth over the fixture workspace", () => {
   it("reports a gauge for root CLAUDE.md and every MEMORY.md", async () => {
     const { gauges } = await memoryHealth();
