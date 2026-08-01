@@ -1,3 +1,4 @@
+import { spaceOf } from "./paths.js";
 import { getState } from "./state.js";
 import type { TreeDir, TreeNode } from "./tree.js";
 
@@ -24,11 +25,6 @@ export interface ActivityFile {
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
   files: ActivityFile[];
-}
-
-function spaceOf(rel: string): string | null {
-  const m = /^Spaces\/([^/]+)\//.exec(rel);
-  return m ? m[1]! : null;
 }
 
 function areaOf(rel: string): string {

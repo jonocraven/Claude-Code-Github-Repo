@@ -134,10 +134,32 @@ The defaults in `.env.example` already point at `/Users/jonathancraven/Claude`, 
   stat every file on every request, including on every change broadcast. On a
   Drive-synced folder those stats hit the network.
 
-Tests went from 22 to 136, plus three probes that drive the real thing —
-`npm run probe:search`, `probe:tree` and `probe:contrast`. Those exist because
-three separate pieces of this work passed their own unit tests while being
-broken in the browser; the probes are the part that actually caught it.
+- **Timeline replaces Activity and Calendar** — they were one surface split by
+  tense. Now a single spine of days: past above, future below, today anchored
+  with the only rule on the page, and the view lands there rather than at the
+  top. Quiet stretches collapse to "3 quiet days" instead of padding the page
+  with blanks. The month grid survives as a second view. Changes, scheduled
+  runs and due tasks share the spine and are told apart by mark *shape*, since
+  colour already means space everywhere else. Tabs saved as Activity or
+  Calendar are migrated on load, title included.
+- **Connections** — a new window for the three questions the app could not
+  answer at all: which spaces actually touch (grouped by pair, so "House Move
+  ↔ Finances, 3 links" is the finding), which documents are load-bearing, and
+  which are forgotten — nothing links to them, stalest first.
+- **Recent activity comes from memory too** — it used to walk the whole
+  workspace and stat every file on every request, so flicking between the
+  7/14/30-day ranges triggered three full walks of a Drive-synced folder.
+- **System surfaces stay put** — Today, Timeline, Search, Files, Tasks, Memory
+  and Connections open as kept tabs. Clicking a result from one of them used to
+  destroy the surface you clicked it from. Spaces are still previews, which is
+  what previews were introduced for.
+
+Tests went from 22 to 191, plus six probes that drive the real thing:
+`npm run probe:search`, `probe:tree`, `probe:recent`, `probe:timeline`,
+`probe:connections` and `probe:contrast`. They exist because several pieces of
+this work passed their own unit tests while being broken in the browser — for
+one of them the entire suite stayed green with the feature deleted. The probes
+are the part that actually caught it.
 
 ## What exists so far
 

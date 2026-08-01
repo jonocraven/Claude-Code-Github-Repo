@@ -3173,3 +3173,185 @@ a.ref-unresolved {
   text-underline-offset: 2px;
 }
 .tl-more:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Connections — seams between spaces, load-bearing docs, forgotten ones.
+   ========================================================================== */
+
+.cx {
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-5);
+}
+
+.cx-section { margin-bottom: var(--space-6); }
+
+.cx-note {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-3);
+  max-width: 62ch;
+}
+
+.cx-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* A seam is a claim ("these two spaces touch, 3 times") with its evidence
+   folded away underneath — the count is the finding, the links are the proof. */
+.cx-seams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cx-seam {
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.cx-seam-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-3);
+}
+
+.cx-seam-name {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cx-seam-join { color: var(--ink-faint); }
+
+.cx-caret {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: var(--text-small);
+}
+
+/* Bullets are opted out per list rather than globally: Reader content is
+   markdown and its lists must keep theirs. */
+.cx-links {
+  border-top: var(--border);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+}
+
+.cx-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-link:hover { background: var(--paper-deep); }
+
+.cx-link-pair {
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-link-snippet {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cx-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.cx-row:hover { background: var(--paper-deep); }
+
+.cx-row-name {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cx-row-meta,
+.cx-row-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.cx-table {
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.cx-tr {
+  display: grid;
+  grid-template-columns: minmax(140px, 2fr) repeat(5, minmax(56px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+.cx-tr + .cx-tr { border-top: 1px solid var(--paper-deep); }
+
+.cx-th {
+  background: var(--paper-deep);
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: var(--border);
+}
+
+.cx-td-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

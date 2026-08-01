@@ -265,6 +265,53 @@ export function completeTask(id: string): Promise<Response> {
   });
 }
 
+// --- Connections: where the silos touch ----------------------------------
+
+export interface CrossLink {
+  source: string;
+  sourceTitle: string;
+  sourceSpace: string;
+  target: string;
+  targetTitle: string;
+  targetSpace: string;
+  snippet: string;
+}
+
+export interface Orphan {
+  path: string;
+  title: string;
+  space: string | null;
+  modified: string;
+}
+
+export interface Hub {
+  path: string;
+  title: string;
+  space: string | null;
+  inbound: number;
+  outbound: number;
+}
+
+export interface SpaceConnections {
+  space: string;
+  docs: number;
+  internalLinks: number;
+  outboundCross: number;
+  inboundCross: number;
+  orphans: number;
+}
+
+export interface Connections {
+  crossLinks: CrossLink[];
+  orphans: Orphan[];
+  hubs: Hub[];
+  spaces: SpaceConnections[];
+}
+
+export function fetchConnections(): Promise<Connections> {
+  return getJson("/api/connections");
+}
+
 // --- Today: the cross-space triage surface -------------------------------
 
 export interface ChangedGroup {

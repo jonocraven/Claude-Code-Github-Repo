@@ -5,7 +5,7 @@ import { useTabs } from "../store/tabs";
 // System apps that appear as nav items (Reader/Viewer/Welcome are tab-only).
 // Search sits here now that it is a window; the row above the spaces is the
 // ⌘K palette, which is a different tool for a different moment — see below.
-const SYSTEM_NAV = ["files", "search", "tasks", "timeline", "memory"];
+const SYSTEM_NAV = ["files", "search", "tasks", "timeline", "memory", "connections"];
 
 // Today is the landing surface, so it sits above the spaces rather than
 // among the system tools it summarises.

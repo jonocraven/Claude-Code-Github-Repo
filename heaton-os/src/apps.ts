@@ -31,6 +31,7 @@ export const APPS: AppDef[] = [
   // by tense. Both ids still resolve (below) so a saved layout keeps working.
   { id: "timeline", name: "Timeline", kind: "system", accentVar: "--accent-system" },
   { id: "memory", name: "Memory", kind: "system", accentVar: "--accent-system" },
+  { id: "connections", name: "Connections", kind: "system", accentVar: "--accent-system" },
 ];
 
 export const WELCOME_APP: AppDef = {

@@ -15,7 +15,8 @@
     "probe:recent": "node scripts/probe-recent.mjs",
     "probe:search": "node scripts/probe-search.mjs",
     "probe:contrast": "node scripts/contrast-check.mjs",
-    "probe:timeline": "node scripts/probe-timeline.mjs"
+    "probe:timeline": "node scripts/probe-timeline.mjs",
+    "probe:connections": "node scripts/probe-connections.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",

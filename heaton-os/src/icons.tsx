@@ -142,6 +142,16 @@ const ICONS: Record<string, (p: IconProps) => React.JSX.Element> = {
       <path d="M3 13.2h3.4l2-6.4 3.6 11 2.4-7.4 1.6 3.4H21" />
     </Svg>
   ),
+  // Connections: two nodes with a link between them, and a third off to one
+  // side — a graph with a seam in it.
+  connections: (p) => (
+    <Svg {...p}>
+      <circle cx="6" cy="7" r="2.4" />
+      <circle cx="18" cy="12" r="2.4" />
+      <circle cx="7.5" cy="17.5" r="2.4" />
+      <path d="m8.2 8.2 7.6 3.1M15.8 13.4 9.6 16.4" />
+    </Svg>
+  ),
   // Timeline: a spine with today marked on it — the shape of the window.
   timeline: (p) => (
     <Svg {...p}>

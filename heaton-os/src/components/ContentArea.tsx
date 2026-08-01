@@ -3,6 +3,7 @@ import type { TreeDir } from "../api";
 import { AppIcon } from "../icons";
 import { SPACE_CONFIG } from "../spaces";
 import { useTabs, type Pane, type Tab } from "../store/tabs";
+import { ConnectionsWindow } from "../windows/ConnectionsWindow";
 import { FilesWindow } from "../windows/FilesWindow";
 import { MemoryWindow } from "../windows/MemoryWindow";
 import { ReaderWindow } from "../windows/ReaderWindow";
@@ -38,6 +39,8 @@ function renderTab(tab: Tab, tree: TreeDir | null, error: string | null) {
       return <TasksWindow />;
     case "memory":
       return <MemoryWindow />;
+    case "connections":
+      return <ConnectionsWindow />;
     // "calendar" and "activity" are the pre-merge ids, still arriving from
     // saved layouts. They resolve here rather than falling through to
     // "Unknown view".

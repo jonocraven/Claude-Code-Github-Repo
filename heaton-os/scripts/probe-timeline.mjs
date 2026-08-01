@@ -101,7 +101,9 @@ try {
   await page.waitForTimeout(900);
   check("the month grid survives the merge", (await page.locator(".calendar-grid").count()) > 0);
 
-  // 9. A tab saved under the retired ids still resolves.
+  // 9. Tabs saved under the retired ids are migrated on load: rewritten to
+  //    Timeline, retitled, and collapsed into one rather than restoring two
+  //    identical windows.
   await page.evaluate(() => {
     localStorage.setItem("heaton-os.tabs.v1", JSON.stringify({
       tabs: [
@@ -113,14 +115,16 @@ try {
   });
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForSelector(".pane-body", { timeout: 15000 });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1400);
+
+  const restored = await page.$$eval(".doctab-title", (e) => e.map((x) => x.textContent.trim()));
+  check("retired tabs collapse to a single Timeline", restored.length === 1,
+    restored.join(" | "));
+  check("and are retitled, not left saying Activity", restored[0] === "Timeline",
+    restored.join(" | "));
   const body = await page.textContent(".pane-body");
-  check("a tab saved as 'activity' still resolves after the merge",
+  check("the restored tab renders the Timeline, not 'Unknown view'",
     !body.includes("Unknown view"), body.slice(0, 60).replace(/\s+/g, " "));
-  await page.locator(".doctab-open", { hasText: "Calendar" }).first().click();
-  await page.waitForTimeout(1200);
-  check("a tab saved as 'calendar' still resolves after the merge",
-    !(await page.textContent(".pane-body")).includes("Unknown view"));
 
   check("no console or page errors", errors.length === 0, errors.slice(0, 2).join(" || "));
   await page.screenshot({ path: "/tmp/timeline.png" });

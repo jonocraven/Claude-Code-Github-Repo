@@ -4,7 +4,7 @@
 > (Sonnet or Haiku) instead of being done by hand.
 > **Why:** Several roadmap items are closed-form and testable. Those are worth
 > delegating; the ones that turn on product judgement or visual taste are not.
-> **Status:** Eight briefs; 01–06 run and merged. Every one shipped work that
+> **Status:** Eight briefs, all run and merged. Every one shipped work that
 > compiled and passed its own tests; four of the six also shipped a defect only
 > findable by exercising the feature as it actually runs. The verification
 > section below is the part that earns its keep.
@@ -47,7 +47,8 @@ the chance to think it through.
 | **Today view** | The judgement *is* the deliverable — what earns a place, how it ranks, what "since you last looked" means. Delegating this delegates the product. |
 | **Structured memory schema** | Data modelling. Get the schema wrong and everything built on it inherits the mistake. Design it first, *then* the parser is delegable (see note in 04). |
 | **Visual hierarchy & type scale** | Taste. The whole task is deciding what recedes. |
-| **Calendar merge — visual encoding** | Three event types in one cell without mush is a design problem. The *data* half could be delegated once the encoding is fixed. |
+| **Calendar merge — visual encoding** | ~~Three event types in one cell without mush is a design problem.~~ Done in-house: colour was already spent on spaces, so type is carried by mark shape. The data half needed no delegation in the end — the client composes the two endpoints that already existed. |
+| **Connections — the surface** | Brief 08 delegated the graph analysis and explicitly excluded the UI. Deciding that a seam is undirected, and that the pair count is the finding while the links are only its evidence, is the product. |
 | **Ask about a space** | Architecture plus prompt design, and it's the feature most likely to be confidently wrong. |
 
 ## Running one
