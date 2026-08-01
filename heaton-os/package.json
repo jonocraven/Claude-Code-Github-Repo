@@ -10,7 +10,8 @@
     "web": "vite --open",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "probe:tree": "node scripts/probe-tree.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",

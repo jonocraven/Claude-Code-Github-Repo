@@ -107,6 +107,7 @@ npm run typecheck
 
 ## House rules
 
-Inherit all rules in [README.md](README.md). Rules 8, 9 and 11 in particular:
-paste real command output, mutation-check your tests, and verify your base
+Inherit all rules in [README.md](README.md). Rules 8, 9, 11 and 12 in
+particular: paste real command output, mutation-check your tests, don't let a
+mirror of the implementation stand in for coverage of it, and verify your base
 commit before writing anything.

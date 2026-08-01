@@ -132,7 +132,17 @@ These apply to all delegated work in this repo and are repeated in each brief:
     that contradicts the code is a finding to report, not a thing to quietly
     paper over — and "no discrepancies" when there were some is the single
     least useful thing you can return.
-11. **Verify your base commit before writing anything** (see "Running one").
+11. **A test that mirrors the implementation does not test it.** Brief 06's
+    suite reimplemented `incrementalUpdate`'s orchestration inside the test
+    file — because `server/state.ts` closes over a module-level
+    `WORKSPACE_ROOT` and could not be pointed at a fixture. Deleting the real
+    refresh line left **all 130 tests green** while the feature was dead. The
+    agent found and reported this honestly, which is the behaviour these rules
+    are for. When you cannot reach the real code path, say so plainly and add
+    a probe that drives it for real (`npm run probe:tree` is the pattern:
+    boot the server, change the workspace, assert over HTTP). Do not let a
+    mirror stand in for coverage without naming it as one.
+12. **Verify your base commit before writing anything** (see "Running one").
     If a test fails for a reason that looks unrelated to your work, check the
     base *before* dismissing it as pre-existing — on brief 02 four such
     failures were entirely an artefact of a stale checkout.
