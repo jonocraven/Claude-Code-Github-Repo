@@ -2827,3 +2827,159 @@ a.ref-unresolved {
   border-radius: var(--radius);
 }
 .gauge-open:hover { background: var(--paper-deep); }
+
+/* ==========================================================================
+   Search window — the persistent counterpart to the ⌘K palette.
+   Every value is a token, so this inherits any theme change for free.
+   ========================================================================== */
+
+.searchw {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.searchw-head {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  border-bottom: var(--border);
+  background: var(--paper-deep);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.searchw-input {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.searchw-input::placeholder { color: var(--ink-faint); }
+
+.searchw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.searchw-count {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.searchw-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
+.searchw-group { margin-bottom: var(--space-5); }
+
+.searchw-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-2);
+}
+
+.searchw-group-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.searchw-sub {
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* A result is a row plus a send-to-split affordance, so opening something to
+   read never costs you the result set you found it in. */
+.sr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  border-radius: var(--radius);
+}
+.sr-row:hover,
+.sr-row.is-active { background: var(--paper-deep); }
+
+.sr-open {
+  display: grid;
+  grid-template-columns: 3px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: stretch;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.sr-rule { border-radius: 2px; }
+
+.sr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sr-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-snippet {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sr-snippet mark {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid currentColor;
+}
+
+.sr-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-split {
+  padding: 0 var(--space-3);
+  color: var(--ink-faint);
+  opacity: 0;
+  flex-shrink: 0;
+}
+.sr-row:hover .sr-split,
+.sr-row.is-active .sr-split,
+.sr-split:focus-visible { opacity: 1; }
+.sr-split:hover { color: var(--ink); }

@@ -95,10 +95,22 @@ export interface SearchHit {
   space: string | null;
   snippet: string;
   score: number;
+  modified?: string;
+}
+
+/** A filename match — the only way non-markdown files are findable. */
+export interface FileHit {
+  path: string;
+  name: string;
+  space: string | null;
+  ext: string;
 }
 
 export interface SearchResponse {
   keyword: SearchHit[];
+  /** Matches before the limit, so the UI can say "12 of 47". */
+  keywordTotal: number;
+  files: FileHit[];
   semantic: SearchHit[];
   semanticStatus: "building" | "ready" | "unavailable";
 }
@@ -127,9 +139,14 @@ export async function fetchBacklinks(path: string): Promise<Backlink[]> {
   return data.backlinks;
 }
 
-export function fetchSearch(q: string, space: string | null): Promise<SearchResponse> {
+export function fetchSearch(
+  q: string,
+  space: string | null,
+  limit?: number
+): Promise<SearchResponse> {
   const params = new URLSearchParams({ q });
   if (space) params.set("space", space);
+  if (limit) params.set("limit", String(limit));
   return getJson(`/api/search?${params}`);
 }
 

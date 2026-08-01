@@ -143,11 +143,72 @@ describe("useTabs store", () => {
     expect(useTabs.getState().tabs[0]?.instanceKey).toBe("doc2");
   });
 
-  it("appId: 'search' never creates a tab", async () => {
+  // Search is a surface now, not only the palette. It used to be refused a
+  // tab outright; these pin the behaviour that replaced that.
+
+  it("openSearch opens a kept tab, never a preview", async () => {
+    const { useTabs, openSearch } = await import("./tabs.js");
+    openSearch("mortgage");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.appId).toBe("search");
+    // A search you can destroy by clicking its own first result is not a
+    // surface you can work from, so it must not be transient.
+    expect(tabs[0]?.transient).toBe(false);
+    expect(tabs[0]?.title).toBe("Search: mortgage");
+    expect(tabs[0]?.payload.query).toBe("mortgage");
+  });
+
+  it("openSearch re-aims the existing tab rather than opening a second", async () => {
+    const { useTabs, openSearch } = await import("./tabs.js");
+    openSearch("mortgage");
+    const firstId = useTabs.getState().tabs[0]?.id;
+    openSearch("solicitor", "House-Move");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.id).toBe(firstId);
+    expect(tabs[0]?.payload.query).toBe("solicitor");
+    expect(tabs[0]?.payload.space).toBe("House-Move");
+    expect(tabs[0]?.title).toBe("Search: solicitor");
+  });
+
+  it("launching Search from the dock cold gets the kept tab, not a preview", async () => {
     const { useTabs } = await import("./tabs.js");
-    const state = useTabs.getState();
-    state.openTab({ appId: "search", title: "Search" });
-    expect(useTabs.getState().tabs).toHaveLength(0);
+    // openApp routes search through openSearch; without that it would fall to
+    // the generic path and open a transient tab the next preview would evict.
+    useTabs.getState().openApp("search");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.appId).toBe("search");
+    expect(tabs[0]?.transient).toBe(false);
+  });
+
+  it("launching Search with no query shows what was there, it does not wipe it", async () => {
+    const { useTabs, openSearch } = await import("./tabs.js");
+    openSearch("mortgage");
+    // Reaching for Search in the dock means "show me that again".
+    useTabs.getState().openApp("search");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.payload.query).toBe("mortgage");
+    expect(tabs[0]?.title).toBe("Search: mortgage");
+  });
+
+  it("a preview opened from Search does not evict the search itself", async () => {
+    const { useTabs, openSearch } = await import("./tabs.js");
+    openSearch("mortgage");
+    useTabs.getState().openTab({ appId: "reader", instanceKey: "doc1", title: "Doc One" });
+    expect(useTabs.getState().tabs.map((t) => t.appId)).toEqual(["search", "reader"]);
+  });
+
+  it("the search query survives a reload", async () => {
+    const { openSearch } = await import("./tabs.js");
+    openSearch("mortgage", "House-Move");
+    vi.resetModules();
+    const { useTabs: reloaded } = await import("./tabs.js");
+    const tabs = reloaded.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.payload).toMatchObject({ query: "mortgage", space: "House-Move" });
   });
 
   // Closing

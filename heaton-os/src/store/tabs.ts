@@ -16,6 +16,9 @@ export type Pane = "left" | "right";
 export interface TabPayload {
   path?: string;
   kind?: string;
+  /** Search tabs only — persisted so a reload restores the result set. */
+  query?: string;
+  space?: string | null;
 }
 
 export interface Tab {
@@ -156,7 +159,6 @@ export const useTabs = create<TabState>((set, get) => {
     sidebarCollapsed: persisted.sidebarCollapsed ?? false,
 
     openTab: ({ appId, instanceKey = "", title, payload = {}, pane, transient = true }) => {
-      if (appId === "search") return ""; // search is the palette, never a tab
       const { tabs, activePane, split } = get();
 
       const existing = tabs.find(
@@ -193,7 +195,13 @@ export const useTabs = create<TabState>((set, get) => {
       return id;
     },
 
-    openApp: (appId) => get().openTab({ appId }),
+    // Search is the one app with an identity beyond "which app" — it carries a
+    // query — so launching it goes through openSearch, which knows to reuse
+    // and re-aim rather than open a blank second one.
+    openApp: (appId) => {
+      if (appId === "search") openSearch();
+      else get().openTab({ appId });
+    },
 
     reveal: (path) => {
       const clean = path.replace(/\/$/, "");
@@ -357,6 +365,40 @@ export function consumeSkipRestore(tabId: string): boolean {
   const had = skipRestoreTabs.has(tabId);
   skipRestoreTabs.delete(tabId);
   return had;
+}
+
+/**
+ * Open (or reuse) the Search window, optionally carrying a query in.
+ *
+ * There is deliberately one Search tab per pane rather than one per query.
+ * The window is a place you go back to and re-aim, so a second tab for every
+ * phrase you tried would be tab litter, not history — and the tab title
+ * tracking the query already tells you which search it is holding.
+ *
+ * It opens *kept*, never as a preview: a search you can lose by clicking its
+ * own first result is not a surface you can work from.
+ */
+export function openSearch(query = "", space: string | null = null): void {
+  const title = query.trim() ? `Search: ${query.trim()}` : "Search";
+  const open = useTabs.getState().openTab;
+  const existing = useTabs
+    .getState()
+    .tabs.find((t) => t.appId === "search");
+  if (existing) {
+    // Re-aim the tab that exists rather than stacking another one beside it —
+    // but only when a query was actually supplied. Reaching for Search in the
+    // dock means "show me that again", not "throw away what I had typed".
+    if (query.trim()) {
+      useTabs.getState().retarget(existing.id, {
+        instanceKey: "",
+        title,
+        payload: { query, space },
+      });
+    }
+    useTabs.getState().activate(existing.id);
+    return;
+  }
+  open({ appId: "search", title, payload: { query, space }, transient: false });
 }
 
 /** Route a workspace file to the right tab type (markdown → Reader, else viewer). */

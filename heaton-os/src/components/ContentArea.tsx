@@ -8,6 +8,7 @@ import { CalendarWindow } from "../windows/CalendarWindow";
 import { FilesWindow } from "../windows/FilesWindow";
 import { MemoryWindow } from "../windows/MemoryWindow";
 import { ReaderWindow } from "../windows/ReaderWindow";
+import { SearchWindow } from "../windows/SearchWindow";
 import { SpaceWindow } from "../windows/SpaceWindow";
 import { TasksWindow } from "../windows/TasksWindow";
 import { TodayWindow } from "../windows/TodayWindow";
@@ -24,6 +25,14 @@ function renderTab(tab: Tab, tree: TreeDir | null, error: string | null) {
       return <FilesWindow tree={tree} error={error} />;
     case "reader":
       return <ReaderWindow windowId={tab.id} path={tab.payload.path} tree={tree} />;
+    case "search":
+      return (
+        <SearchWindow
+          windowId={tab.id}
+          initialQuery={tab.payload.query ?? ""}
+          initialSpace={tab.payload.space ?? null}
+        />
+      );
     case "viewer":
       return <ViewerWindow path={tab.payload.path} kind={tab.payload.kind} />;
     case "tasks":

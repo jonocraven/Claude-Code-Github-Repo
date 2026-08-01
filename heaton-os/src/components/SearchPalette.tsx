@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchSearch, type SearchResponse } from "../api";
 import { APPS, type AppDef } from "../apps";
 import { AppIcon } from "../icons";
-import { openFile, useTabs } from "../store/tabs";
+import { openFile, openSearch, useTabs } from "../store/tabs";
 import { useRecent, formatAge } from "../store/recent";
 
 const SPACES = APPS.filter((a) => a.kind === "space");
@@ -89,6 +89,15 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
         },
       });
     }
+    for (const hit of results?.files ?? []) {
+      list.push({
+        key: `file:${hit.path}`,
+        run: () => {
+          openFile(hit.path, { restore: false });
+          onClose();
+        },
+      });
+    }
     for (const hit of results?.semantic ?? []) {
       list.push({
         key: `sem:${hit.path}`,
@@ -98,8 +107,19 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
         },
       });
     }
+    // The escape hatch out of the palette's twelve-hit ceiling. Last in the
+    // list, so ↓ walks past every real hit before offering it.
+    if (query.trim()) {
+      list.push({
+        key: "all",
+        run: () => {
+          openSearch(query.trim(), space);
+          onClose();
+        },
+      });
+    }
     return list;
-  }, [appHits, query, recent, results, openApp, onClose]);
+  }, [appHits, query, space, recent, results, openApp, onClose]);
 
   useEffect(() => setActive(0), [query, space, results?.keyword.length]);
 
@@ -248,6 +268,31 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
             </section>
           )}
 
+          {results && results.files.length > 0 && (
+            <section>
+              <h3 className="palette-section">Files by name</h3>
+              {results.files.map((hit) => {
+                const rc = rowClass(`file:${hit.path}`);
+                return (
+                  <button
+                    type="button"
+                    {...rc}
+                    onClick={() => {
+                      openFile(hit.path, { restore: false });
+                      onClose();
+                    }}
+                  >
+                    <span className="palette-doc">
+                      <span className="palette-title">{hit.name}</span>
+                      {hit.space && <span className="palette-space">{hit.space}</span>}
+                    </span>
+                    <span className="palette-hint">{hit.ext || "file"}</span>
+                  </button>
+                );
+              })}
+            </section>
+          )}
+
           {results && results.semantic.length > 0 && (
             <section>
               <h3 className="palette-section palette-section-related">Related</h3>
@@ -281,10 +326,29 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
           {query.trim() &&
             results &&
             results.keyword.length === 0 &&
+            results.files.length === 0 &&
             results.semantic.length === 0 &&
             appHits.length === 0 && (
               <p className="palette-status">Nothing found for “{query}”.</p>
             )}
+
+          {query.trim() && (
+            <button type="button" {...rowClass("all")} onClick={() => {
+              openSearch(query.trim(), space);
+              onClose();
+            }}>
+              <span className="palette-doc">
+                <span className="palette-title">
+                  See all results for “{query.trim()}”
+                </span>
+              </span>
+              <span className="palette-hint">
+                {results && results.keywordTotal > results.keyword.length
+                  ? `${results.keywordTotal} matches`
+                  : "in Search"}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ import { buildTree } from "./tree.js";
 import { safeAbsolute } from "./paths.js";
 import { renderMarkdown } from "./markdown.js";
 import { getState, initState, onChange } from "./state.js";
-import { searchKeyword } from "./search.js";
+import { searchFilenames, searchKeyword } from "./search.js";
 import { searchSemantic, semanticStatus } from "./semantic.js";
 import { memoryHealth } from "./memory.js";
 import { recentActivity } from "./recent.js";
@@ -187,20 +187,40 @@ app.get<{ Querystring: { path?: string } }>("/api/backlinks", async (req, reply)
   return { path: rel, backlinks: getState().backlinks.get(rel) ?? [] };
 });
 
-app.get<{ Querystring: { q?: string; space?: string } }>(
+app.get<{ Querystring: { q?: string; space?: string; limit?: string } }>(
   "/api/search",
   async (req) => {
     const q = (req.query.q ?? "").trim();
     const space = req.query.space || null;
-    if (!q) return { keyword: [], semantic: [], semanticStatus: semanticStatus() };
+    const empty = {
+      keyword: [],
+      keywordTotal: 0,
+      files: [],
+      semantic: [],
+      semanticStatus: semanticStatus(),
+    };
+    if (!q) return empty;
+
+    // The palette wants a short list; the Search window wants the set. Capped
+    // so a one-letter prefix query can't ask the server to serialise the
+    // entire workspace.
+    const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 200);
 
     const { search, corpus } = getState();
-    const keyword = searchKeyword(search, corpus, q, space);
-    const seen = new Set(keyword.map((k) => k.path));
+    const keyword = searchKeyword(search, corpus, q, space, limit);
+    const seen = new Set(keyword.hits.map((k) => k.path));
+    const files = searchFilenames(corpus, q, space, seen, limit);
+    for (const f of files) seen.add(f.path);
     const semantic = (await searchSemantic(q, space)).filter(
       (s) => !seen.has(s.path)
     );
-    return { keyword, semantic, semanticStatus: semanticStatus() };
+    return {
+      keyword: keyword.hits,
+      keywordTotal: keyword.total,
+      files,
+      semantic,
+      semanticStatus: semanticStatus(),
+    };
   }
 );
 

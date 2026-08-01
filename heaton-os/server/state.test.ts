@@ -118,7 +118,7 @@ function searchPaths(
   term: string
 ): string[] {
   return searchKeyword(index, corpus, term, null)
-    .map((h) => h.path)
+    .hits.map((h) => h.path)
     .sort();
 }
 
