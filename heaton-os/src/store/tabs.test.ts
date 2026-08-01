@@ -1,9 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mock the apps module before any imports
+// Mirrors the real registry closely enough for the store's purposes: `kind`
+// decides whether a rail launch is kept or a preview, so a mock without it
+// would silently exercise the wrong branch.
+const SPACE_IDS = new Set(["cookery-books", "wfdinner", "home", "house-move"]);
 vi.mock("../apps", () => ({
   getApp: (appId: string) => ({
     name: appId.charAt(0).toUpperCase() + appId.slice(1),
+    kind: SPACE_IDS.has(appId) ? "space" : "system",
   }),
 }));
 
@@ -170,6 +175,89 @@ describe("useTabs store", () => {
     expect(tabs[0]?.payload.query).toBe("solicitor");
     expect(tabs[0]?.payload.space).toBe("House-Move");
     expect(tabs[0]?.title).toBe("Search: solicitor");
+  });
+
+  // The Activity/Calendar → Timeline merge.
+
+  it("rewrites a tab saved under a retired app id, title and all", async () => {
+    mem.set("heaton-os.tabs.v1", JSON.stringify({
+      tabs: [{ id: "tab-0", appId: "activity", instanceKey: "", title: "Activity",
+               pane: "left", payload: {}, transient: false }],
+      activeLeft: "tab-0", activeRight: null, split: false, sidebarCollapsed: false,
+    }));
+    const { useTabs } = await import("./tabs.js");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.appId).toBe("timeline");
+    // The rail says Timeline; a tab still saying Activity would just be a lie.
+    expect(tabs[0]?.title).toBe("Timeline");
+  });
+
+  it("collapses Activity and Calendar restored side by side into one Timeline", async () => {
+    mem.set("heaton-os.tabs.v1", JSON.stringify({
+      tabs: [
+        { id: "tab-0", appId: "activity", instanceKey: "", title: "Activity",
+          pane: "left", payload: {}, transient: false },
+        { id: "tab-1", appId: "calendar", instanceKey: "", title: "Calendar",
+          pane: "left", payload: {}, transient: false },
+      ],
+      activeLeft: "tab-0", activeRight: null, split: false, sidebarCollapsed: false,
+    }));
+    const { useTabs } = await import("./tabs.js");
+    expect(useTabs.getState().tabs).toHaveLength(1);
+    expect(useTabs.getState().tabs[0]?.id).toBe("tab-0");
+  });
+
+  it("leaves tabs that were not retired completely alone", async () => {
+    mem.set("heaton-os.tabs.v1", JSON.stringify({
+      tabs: [
+        { id: "tab-0", appId: "reader", instanceKey: "a.md", title: "A note",
+          pane: "left", payload: { path: "a.md" }, transient: false },
+        { id: "tab-1", appId: "reader", instanceKey: "b.md", title: "B note",
+          pane: "left", payload: { path: "b.md" }, transient: false },
+      ],
+      activeLeft: "tab-0", activeRight: null, split: false, sidebarCollapsed: false,
+    }));
+    const { useTabs } = await import("./tabs.js");
+    const tabs = useTabs.getState().tabs;
+    expect(tabs).toHaveLength(2);
+    expect(tabs.map((t) => t.title)).toEqual(["A note", "B note"]);
+  });
+
+  it("only ever drops a tab it rewrote, never one it left alone", async () => {
+    // Two tabs that collide on appId + instanceKey + pane. That state should
+    // not arise, but it has before (the tab-id collision bug), and a load-time
+    // function that silently discards tabs is the dangerous kind. Collapsing
+    // is reserved for the pair migrate itself created.
+    mem.set("heaton-os.tabs.v1", JSON.stringify({
+      tabs: [
+        { id: "tab-0", appId: "files", instanceKey: "", title: "Files",
+          pane: "left", payload: {}, transient: false },
+        { id: "tab-1", appId: "files", instanceKey: "", title: "Files",
+          pane: "left", payload: {}, transient: false },
+      ],
+      activeLeft: "tab-0", activeRight: null, split: false, sidebarCollapsed: false,
+    }));
+    const { useTabs } = await import("./tabs.js");
+    expect(useTabs.getState().tabs.map((t) => t.id)).toEqual(["tab-0", "tab-1"]);
+  });
+
+  it("a system surface launched from the rail is kept, not a preview", async () => {
+    const { useTabs } = await import("./tabs.js");
+    useTabs.getState().openApp("timeline");
+    // Clicking through to a document must not destroy the surface you clicked
+    // it from — the Timeline exists to be clicked through.
+    useTabs.getState().openTab({ appId: "reader", instanceKey: "doc1", title: "Doc One" });
+    expect(useTabs.getState().tabs.map((t) => t.appId)).toEqual(["timeline", "reader"]);
+  });
+
+  it("a space launched from the rail is still a preview", async () => {
+    const { useTabs } = await import("./tabs.js");
+    useTabs.getState().openApp("home");
+    useTabs.getState().openApp("wfdinner");
+    // The case previews exist for: browsing spaces costs one tab, not eight.
+    expect(useTabs.getState().tabs).toHaveLength(1);
+    expect(useTabs.getState().tabs[0]?.appId).toBe("wfdinner");
   });
 
   it("launching Search from the dock cold gets the kept tab, not a preview", async () => {

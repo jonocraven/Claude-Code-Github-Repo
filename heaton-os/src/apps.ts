@@ -27,9 +27,10 @@ export const APPS: AppDef[] = [
   { id: "reader", name: "Reader", kind: "system", accentVar: "--accent-system" },
   { id: "search", name: "Search", kind: "system", accentVar: "--accent-system" },
   { id: "tasks", name: "Tasks", kind: "system", accentVar: "--accent-system" },
-  { id: "calendar", name: "Calendar", kind: "system", accentVar: "--accent-system" },
+  // Timeline replaces Activity and Calendar — they were the same surface split
+  // by tense. Both ids still resolve (below) so a saved layout keeps working.
+  { id: "timeline", name: "Timeline", kind: "system", accentVar: "--accent-system" },
   { id: "memory", name: "Memory", kind: "system", accentVar: "--accent-system" },
-  { id: "activity", name: "Activity", kind: "system", accentVar: "--accent-system" },
 ];
 
 export const WELCOME_APP: AppDef = {
@@ -43,6 +44,10 @@ export const WELCOME_APP: AppDef = {
 const HIDDEN_APPS: AppDef[] = [
   WELCOME_APP,
   { id: "viewer", name: "Viewer", kind: "system", accentVar: "--accent-system" },
+  // Retired ids. A tab saved before the merge must still resolve to something
+  // rather than throwing on restore; both render the Timeline.
+  { id: "activity", name: "Timeline", kind: "system", accentVar: "--accent-system" },
+  { id: "calendar", name: "Timeline", kind: "system", accentVar: "--accent-system" },
 ];
 
 export function getApp(id: string): AppDef {

@@ -86,6 +86,29 @@ interface Persisted {
   sidebarCollapsed: boolean;
 }
 
+/**
+ * Activity and Calendar merged into Timeline. A saved layout still carries the
+ * old ids, and while ContentArea resolves both, a restored tab would otherwise
+ * keep its stale title for ever — the rail says Timeline and the tab says
+ * Activity. Rewriting them on load also collapses the pair, since a workspace
+ * with both open would otherwise restore two identical Timelines.
+ */
+const RETIRED_APPS: Record<string, string> = { activity: "timeline", calendar: "timeline" };
+
+function migrate(tabs: Tab[]): Tab[] {
+  const seen = new Set<string>();
+  const out: Tab[] = [];
+  for (const t of tabs) {
+    const appId = RETIRED_APPS[t.appId] ?? t.appId;
+    const title = appId === t.appId ? t.title : "Timeline";
+    const key = `${appId}:${t.instanceKey}:${t.pane}`;
+    if (appId !== t.appId && seen.has(key)) continue;
+    seen.add(key);
+    out.push({ ...t, appId, title });
+  }
+  return out;
+}
+
 function load(): Partial<TabState> {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -95,7 +118,7 @@ function load(): Partial<TabState> {
     return {
       // Sessions saved before previews existed have no `transient` field.
       // Treat those tabs as kept — restoring a workspace must never drop one.
-      tabs: p.tabs.map((t) => ({ ...t, transient: t.transient ?? false })),
+      tabs: migrate(p.tabs.map((t) => ({ ...t, transient: t.transient ?? false }))),
       activeLeft: p.activeLeft ?? null,
       activeRight: p.split ? (p.activeRight ?? null) : null,
       split: !!p.split,
@@ -195,12 +218,26 @@ export const useTabs = create<TabState>((set, get) => {
       return id;
     },
 
-    // Search is the one app with an identity beyond "which app" — it carries a
-    // query — so launching it goes through openSearch, which knows to reuse
-    // and re-aim rather than open a blank second one.
+    /**
+     * Launching an app from the rail.
+     *
+     * System surfaces (Today, Timeline, Search, Files, Tasks, Memory) open
+     * *kept*. You reach for one of those in order to work from it, and a
+     * surface you destroy by clicking its own first result is not one you can
+     * work from — the Timeline in particular exists to be clicked through.
+     *
+     * Spaces stay previews. That is the case previews were introduced for:
+     * browsing eight spaces should cost one tab, not eight.
+     *
+     * Search additionally carries a query, so it routes through openSearch,
+     * which reuses and re-aims rather than opening a blank second one.
+     */
     openApp: (appId) => {
-      if (appId === "search") openSearch();
-      else get().openTab({ appId });
+      if (appId === "search") {
+        openSearch();
+        return;
+      }
+      get().openTab({ appId, transient: getApp(appId).kind !== "system" });
     },
 
     reveal: (path) => {
