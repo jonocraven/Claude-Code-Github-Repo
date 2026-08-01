@@ -22,11 +22,31 @@ function relLuminance([r, g, b]) {
   return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
 }
 
+/**
+ * Chromium hands colours back in more than one notation: `rgb()`/`rgba()` for
+ * ordinary values, but `color(srgb r g b / a)` with 0–1 channels once a
+ * `color-mix()` is involved. Both have to be understood, or a check silently
+ * reports "unparseable" for a colour that is perfectly measurable.
+ */
 function parseRgb(str) {
+  const srgb = str.match(/color\(\s*srgb\s+([^)]+)\)/i);
+  if (srgb) {
+    const parts = srgb[1].split(/[\s/]+/).filter(Boolean).map(Number);
+    return [parts[0] * 255, parts[1] * 255, parts[2] * 255];
+  }
   const m = str.match(/rgba?\(([^)]+)\)/);
   if (!m) throw new Error(`Could not parse color: ${str}`);
   const parts = m[1].split(",").map((s) => parseFloat(s.trim()));
   return [parts[0], parts[1], parts[2]];
+}
+
+/** Alpha from either notation; 1 when none is present. */
+function parseAlpha(str) {
+  const srgb = str.match(/color\(\s*srgb\s+[^/)]+\/\s*([\d.]+)\s*\)/i);
+  if (srgb) return Number(srgb[1]);
+  const rgba = str.match(/rgba?\(([^)]+)\)/);
+  const parts = rgba ? rgba[1].split(",") : [];
+  return parts.length > 3 ? Number(parts[3]) : 1;
 }
 
 function contrastRatio(fg, bg) {
@@ -177,6 +197,75 @@ async function run() {
       const passFill = ratioFill >= 4.5;
       rows.push({ theme, label: `${name} as fill behind --paper text`, ratio: ratioFill, pass: passFill });
       if (!passFill) failures.push(`${theme}: ${name} as fill behind --paper text = ${ratioFill.toFixed(2)}:1`);
+    }
+
+    // A scrim must always *darken* what is behind it. Deriving it from --ink
+    // made it a lightening glare in dark mode, which is why this is measured
+    // rather than eyeballed.
+    //
+    // Read back the *computed* colour of a real element, not the custom
+    // property's text: a token may legitimately hold `color-mix(...)` or any
+    // other syntax, and only the browser can resolve it to channels.
+    const scrim = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.background = "var(--scrim)";
+      const ground = document.createElement("div");
+      ground.style.background = "var(--paper)";
+      document.body.append(probe, ground);
+      const out = {
+        scrim: getComputedStyle(probe).backgroundColor,
+        paper: getComputedStyle(ground).backgroundColor,
+      };
+      probe.remove();
+      ground.remove();
+      return out;
+    });
+    // Chromium leaves `color-mix()` unresolved at computed-value time, so a
+    // scrim written that way cannot be measured here at all. That is not a
+    // reason to skip the check — an unverifiable scrim fails, which is exactly
+    // what the ink-derived version was.
+    let darkens = false;
+    let scrimRatio = 0;
+    let scrimNote = "";
+    try {
+      const alpha = parseAlpha(scrim.scrim);
+      const scrimRgb = parseRgb(scrim.scrim);
+      const paperRgb = parseRgb(scrim.paper);
+      const over = scrimRgb.map((c, i) => c * alpha + paperRgb[i] * (1 - alpha));
+      darkens = relLuminance(over) < relLuminance(paperRgb);
+      scrimRatio = (relLuminance(paperRgb) + 0.05) / (relLuminance(over) + 0.05);
+    } catch {
+      scrimNote = ` (unresolvable: ${scrim.scrim})`;
+    }
+    rows.push({
+      theme,
+      label: "--scrim darkens the ground behind a modal",
+      ratio: scrimRatio,
+      pass: darkens,
+    });
+    if (!darkens) {
+      failures.push(`${theme}: --scrim does not darken the ground${scrimNote}`);
+    }
+
+    // And the boot screen must not flash a bright ground before a dark app.
+    const boot = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.background = "var(--boot-ground)";
+      probe.style.color = "var(--boot-ink)";
+      document.body.appendChild(probe);
+      const cs = getComputedStyle(probe);
+      const out = { ground: cs.backgroundColor, ink: cs.color };
+      probe.remove();
+      return out;
+    });
+    const bootRatio = contrastRatio(boot.ink, boot.ground);
+    rows.push({ theme, label: "boot screen ink vs its ground", ratio: bootRatio, pass: bootRatio >= 4.5 });
+    if (bootRatio < 4.5) failures.push(`${theme}: boot screen = ${bootRatio.toFixed(2)}:1`);
+
+    if (theme === "dark") {
+      const bootIsDark = relLuminance(parseRgb(boot.ground)) < 0.5;
+      rows.push({ theme, label: "boot screen stays dark in dark mode", ratio: 0, pass: bootIsDark });
+      if (!bootIsDark) failures.push("dark: boot screen ground is light — it would flash on launch");
     }
 
     await page.close();

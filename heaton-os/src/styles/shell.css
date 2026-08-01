@@ -13,8 +13,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--boot-ground);
+  color: var(--boot-ink);
   padding: var(--space-5);
 }
 
@@ -802,7 +802,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -1829,7 +1829,7 @@ a.ref-unresolved {
   position: fixed;
   inset: 0;
   z-index: 110;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
