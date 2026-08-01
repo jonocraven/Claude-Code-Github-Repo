@@ -4,7 +4,10 @@
 > (Sonnet or Haiku) instead of being done by hand.
 > **Why:** Several roadmap items are closed-form and testable. Those are worth
 > delegating; the ones that turn on product judgement or visual taste are not.
-> **Status:** Five briefs ready. None have been run yet.
+> **Status:** Six briefs, all run and merged. Every one shipped work that
+> compiled and passed its own tests; four of the six also shipped a defect only
+> findable by exercising the feature as it actually runs. The verification
+> section below is the part that earns its keep.
 
 ## The rule used to decide
 
@@ -33,6 +36,7 @@ the chance to think it through.
 | 03 | [Reader navigation](03-reader-navigation.md) | Sonnet | TOC, position memory, next/prev, backlinks — all mechanical, all assertable. |
 | 04 | [Incremental indexing](04-incremental-indexing.md) | Sonnet | Pure perf refactor with an exact behavioural contract: output must not change. |
 | 05 | [Dark mode](05-dark-mode.md) | Sonnet | Token architecture already supports it, and the palette is supplied — so it's application plus measurement, not design. |
+| 06 | [Tree cache](06-tree-cache.md) | Sonnet | Pure perf refactor with an exact contract: the JSON must not change. |
 
 ## What to keep in-house
 
