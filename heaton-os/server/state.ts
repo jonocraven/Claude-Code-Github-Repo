@@ -12,6 +12,7 @@ import {
 import { scanCorpus, updateCorpus, type Corpus } from "./corpus.js";
 import { buildSearchIndex, updateSearchIndex } from "./search.js";
 import { buildSemanticIndex } from "./semantic.js";
+import { buildTree, type TreeDir } from "./tree.js";
 
 /**
  * The filesystem is the database (brief §2.2): everything derived —
@@ -26,6 +27,9 @@ interface AppState {
   /** Not part of any API response — kept only so incremental updates (brief
    * 04) can diff a changed document's outgoing refs without a full rescan. */
   forward: ForwardIndex;
+  /** Served by GET /api/tree (brief 06) — kept in state so a request never
+   * triggers its own walk of the workspace. */
+  tree: TreeDir;
 }
 
 let state: AppState | null = null;
@@ -59,6 +63,7 @@ async function rebuild(): Promise<void> {
     search: buildSearchIndex(corpus),
     backlinks: buildBacklinks(corpus),
     forward: buildForwardIndex(corpus),
+    tree: await buildTree(WORKSPACE_ROOT),
   };
 }
 
@@ -97,6 +102,12 @@ async function incrementalUpdate(changedPaths: readonly string[]): Promise<void>
       forward: buildForwardIndex(current.corpus),
     };
   }
+
+  // Re-walk rather than patch (brief 06): a changed file alters `fileCount`
+  // and `latestModified` on every ancestor directory, which is exactly the
+  // kind of surgical-patch drift brief 04 hit for backlinks. This still only
+  // runs once per debounced change burst, not once per request.
+  getState().tree = await buildTree(WORKSPACE_ROOT);
 }
 
 export async function initState(): Promise<{ files: number; docs: number }> {
