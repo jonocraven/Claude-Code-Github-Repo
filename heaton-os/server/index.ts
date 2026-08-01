@@ -15,6 +15,7 @@ import { recentActivity } from "./recent.js";
 import { scheduledMonth } from "./scheduled.js";
 import { completeTask, plate, sectionTasks } from "./todoist.js";
 import { today } from "./today.js";
+import { crossSpaceLinks, hubs, orphans, spaceConnections } from "./connections.js";
 
 // Model downloads etc. respect HTTPS_PROXY when one is configured; a no-op
 // otherwise. Fetches happen only at first semantic-index build.
@@ -184,6 +185,16 @@ app.get<{ Querystring: { path?: string } }>("/api/backlinks", async (req, reply)
   const rel = req.query.path ?? "";
   if (!safeAbsolute(rel)) return badPath(reply);
   return { path: rel, backlinks: getState().backlinks.get(rel) ?? [] };
+});
+
+app.get("/api/connections", async () => {
+  const { corpus, backlinks, forward } = getState();
+  return {
+    crossLinks: crossSpaceLinks(corpus, forward),
+    orphans: orphans(corpus, backlinks, forward),
+    hubs: hubs(corpus, backlinks, forward),
+    spaces: spaceConnections(corpus, backlinks, forward),
+  };
 });
 
 app.get<{ Querystring: { q?: string; space?: string; limit?: string } }>(
